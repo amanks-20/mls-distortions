@@ -104,9 +104,105 @@ strong { font-weight: 600; }
 .nav-links a { color: var(--text); opacity: 0.8; white-space: nowrap; }
 .nav-links a:hover { opacity: 1; text-decoration: none; }
 
+/* Phones without JS: name on top, links scroll sideways underneath */
 @media (max-width: 720px) {
-    .nav .wide { flex-direction: column; align-items: flex-start; gap: 2px; padding-top: 10px; padding-bottom: 8px; }
-    .nav-links { width: 100%; gap: 18px; padding-bottom: 2px; }
+    .nav:not(.has-toggle) .wide { flex-direction: column; align-items: flex-start; gap: 2px; padding-top: 10px; padding-bottom: 8px; }
+    .nav:not(.has-toggle) .nav-links { width: 100%; gap: 18px; padding-bottom: 2px; }
+}
+
+/* Menu button: hidden on wider screens */
+.nav-toggle { display: none; }
+
+/* Phones with JS: three-line button opens a full-screen menu (as on amanks-20.github.io) */
+@media (max-width: 720px) {
+    .nav.has-toggle .wide { min-height: 48px; }
+
+    .nav-toggle {
+        display: block;
+        position: relative;
+        width: 44px;
+        height: 44px;
+        margin-right: -12px;
+        padding: 0;
+        border: 0;
+        background: none;
+        color: var(--text);
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .nav-toggle span {
+        position: absolute;
+        left: 13px;
+        width: 18px;
+        height: 1.5px;
+        border-radius: 1px;
+        background: currentColor;
+        transition: transform 0.3s ease, opacity 0.2s ease, top 0.3s ease;
+    }
+    .nav-toggle span:nth-child(1) { top: 16px; }
+    .nav-toggle span:nth-child(2) { top: 21.25px; }
+    .nav-toggle span:nth-child(3) { top: 26.5px; }
+
+    .nav.is-open .nav-toggle span:nth-child(1) { top: 21.25px; transform: rotate(45deg); }
+    .nav.is-open .nav-toggle span:nth-child(2) { opacity: 0; }
+    .nav.is-open .nav-toggle span:nth-child(3) { top: 21.25px; transform: rotate(-45deg); }
+
+    .nav.has-toggle .nav-links {
+        position: fixed;
+        top: 49px;
+        left: 0;
+        right: 0;
+        height: calc(100vh - 49px);
+        height: calc(100dvh - 49px);
+        flex-direction: column;
+        gap: 0;
+        padding: 20px 22px 40px;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        background: var(--bg);
+        visibility: hidden;
+        opacity: 0;
+        transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+    }
+
+    .nav.is-open .nav-links {
+        visibility: visible;
+        opacity: 1;
+        transition: opacity 0.3s ease, visibility 0s;
+    }
+
+    .nav.has-toggle .nav-links a {
+        padding: 8px 0;
+        font-size: 28px;
+        font-weight: 600;
+        letter-spacing: -0.015em;
+        line-height: 1.2;
+        opacity: 0;
+        transform: translateY(-8px);
+        transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .nav.is-open .nav-links a {
+        opacity: 1;
+        transform: none;
+        transition-delay: calc(0.05s + var(--i, 0) * 0.03s);
+    }
+
+    /* Menu open: solid bar, no scrolling behind it */
+    .nav.is-open {
+        background: var(--bg);
+        border-bottom-color: transparent;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+    }
+    html.nav-locked { overflow: hidden; }
+}
+
+@media (max-width: 720px) and (prefers-reduced-motion: reduce) {
+    .nav-toggle span,
+    .nav.has-toggle .nav-links,
+    .nav.has-toggle .nav-links a { transition: none !important; }
 }
 
 /* ---------- Header ---------- */
