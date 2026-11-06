@@ -14,9 +14,20 @@ The equations are verified through simulation.
 - **Defense slides:** https://doi.org/10.5281/zenodo.23734352
 - **Posters:** GeodCon-26, INSA New Delhi, 2026 (https://doi.org/10.6084/m9.figshare.32005995) · Geospatial Technologies and Smart Cities Workshop, IIT Kanpur & University of Melbourne, 2025 (https://doi.org/10.6084/m9.figshare.28200089)
 
-## Status
+## Project page
 
-A project page and code are in preparation.
+**https://amanks-20.github.io/mls-distortions/**: a five-step primer, an interactive distortion explorer, the equations, and the validation results.
+
+The page is static HTML, CSS and JavaScript, with no build step and no dependencies. Open `index.html` locally, or serve it with GitHub Pages from the `main` branch root. Explorer links such as `?case=A3` or `?case=B1&side=L` open a thesis test case directly.
+
+```
+index.html               page
+static/css/style.css     styles (same tokens as amanks-20.github.io)
+static/js/explorer.js    closed-form model + independent top-view scan simulation
+static/images/           figures from the thesis
+```
+
+Code for the analysis is in preparation.
 
 ## Citation
 
