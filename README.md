@@ -109,4 +109,4 @@ The following are **not** covered by this licence and remain with their respecti
 
 ## Author
 
-[Aman Kumar Singh](https://amanks-20.github.io/), IIT Kanpur. Supervised by [Prof. Bharat Lohani](https://home.iitk.ac.in/~blohani/), with [Prof. Gaurav Pandey](https://engineering.tamu.edu/etid/profiles/pandey-gaurav.html).
+[Aman Kumar Singh](https://amanks-20.github.io/), IIT Kanpur. Supervised by [Prof. Bharat Lohani](https://home.iitk.ac.in/~blohani/).
