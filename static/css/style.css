@@ -427,6 +427,7 @@ details.more summary { cursor: pointer; color: var(--link); font-size: 15px; }
     line-height: 1.5;
     cursor: pointer;
 }
+.pill[hidden] { display: none; }
 .pill:hover { border-color: var(--link); text-decoration: none; }
 .pill[aria-pressed="true"] { background: var(--link); border-color: var(--link); color: #fff; }
 
