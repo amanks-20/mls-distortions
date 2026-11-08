@@ -1,0 +1,643 @@
+{
+ "cases": {
+  "A1-L": {
+   "input": {
+    "phiH": 45,
+    "phiV": 30,
+    "side": "L",
+    "theta": 0,
+    "vm": 40,
+    "vo": 20
+   },
+   "model": {
+    "alpha": 26.565051177077965,
+    "beta": -39.23152048359223,
+    "gamma": -44.99999999999999,
+    "ls": 8,
+    "ratio": 2,
+    "together": false,
+    "vl": 40
+   },
+   "sim": {
+    "capped": false,
+    "inverted": false,
+    "lsEdge": 8,
+    "nProf": 240,
+    "points": 4745,
+    "ptsHash": "167843ba125955df",
+    "t0": -0.5399999999999999,
+    "t1": 0.5400000000000003
+   }
+  },
+  "A1-R": {
+   "input": {
+    "phiH": 45,
+    "phiV": 30,
+    "side": "R",
+    "theta": 0,
+    "vm": 40,
+    "vo": 20
+   },
+   "model": {
+    "alpha": -26.565051177077965,
+    "beta": -39.23152048359223,
+    "gamma": 44.99999999999999,
+    "ls": 8,
+    "ratio": 2,
+    "together": false,
+    "vl": 40
+   },
+   "sim": {
+    "capped": false,
+    "inverted": false,
+    "lsEdge": 7.95,
+    "nProf": 240,
+    "points": 4743,
+    "ptsHash": "36442fec71e0cdf7",
+    "t0": -0.5400000000000003,
+    "t1": 0.5399999999999999
+   }
+  },
+  "A2-L": {
+   "input": {
+    "phiH": 45,
+    "phiV": 30,
+    "side": "L",
+    "theta": 0,
+    "vm": 40,
+    "vo": 40
+   },
+   "model": {
+    "alpha": 26.565051177077965,
+    "beta": 39.23152048359223,
+    "gamma": 45,
+    "ls": "NaN",
+    "ratio": "NaN",
+    "together": true,
+    "vl": 40
+   },
+   "sim": {
+    "capped": true,
+    "inverted": false,
+    "lsEdge": 27.77777777777778,
+    "nProf": 556,
+    "points": 11697,
+    "ptsHash": "ebef46f31b0ddde8",
+    "t0": 0,
+    "t1": 2.5
+   }
+  },
+  "A2-R": {
+   "input": {
+    "phiH": 45,
+    "phiV": 30,
+    "side": "R",
+    "theta": 0,
+    "vm": 40,
+    "vo": 40
+   },
+   "model": {
+    "alpha": -26.565051177077965,
+    "beta": 39.23152048359223,
+    "gamma": -45,
+    "ls": "NaN",
+    "ratio": "NaN",
+    "together": true,
+    "vl": 40
+   },
+   "sim": {
+    "capped": true,
+    "inverted": false,
+    "lsEdge": 27.77777777777778,
+    "nProf": 556,
+    "points": 11697,
+    "ptsHash": "3a3198bcf5199a6d",
+    "t0": 0,
+    "t1": 2.5
+   }
+  },
+  "A3-L": {
+   "input": {
+    "phiH": 45,
+    "phiV": 30,
+    "side": "L",
+    "theta": 0,
+    "vm": 40,
+    "vo": 100
+   },
+   "model": {
+    "alpha": 43.70832825664493,
+    "beta": 53.68980840389032,
+    "gamma": 59.03624346792648,
+    "ls": -2.6666666666666665,
+    "ratio": -0.6666666666666666,
+    "together": false,
+    "vl": 40
+   },
+   "sim": {
+    "capped": false,
+    "inverted": true,
+    "lsEdge": 2.666666666666668,
+    "nProf": 201,
+    "points": 3974,
+    "ptsHash": "815cc110c28a4d75",
+    "t0": -0.18000000000000008,
+    "t1": 0.17999999999999997
+   }
+  },
+  "A3-R": {
+   "input": {
+    "phiH": 45,
+    "phiV": 30,
+    "side": "R",
+    "theta": 0,
+    "vm": 40,
+    "vo": 100
+   },
+   "model": {
+    "alpha": -43.70832825664495,
+    "beta": 53.68980840389032,
+    "gamma": -59.03624346792648,
+    "ls": -2.6666666666666665,
+    "ratio": -0.6666666666666666,
+    "together": false,
+    "vl": 40
+   },
+   "sim": {
+    "capped": false,
+    "inverted": true,
+    "lsEdge": 2.666666666666668,
+    "nProf": 201,
+    "points": 3974,
+    "ptsHash": "85d59eca88070fbf",
+    "t0": -0.17999999999999997,
+    "t1": 0.18000000000000008
+   }
+  },
+  "B1-L": {
+   "input": {
+    "phiH": 45,
+    "phiV": 30,
+    "side": "L",
+    "theta": 180,
+    "vm": 40,
+    "vo": 20
+   },
+   "model": {
+    "alpha": 4.763641690726179,
+    "beta": -15.22515701067782,
+    "gamma": 18.434948822922006,
+    "ls": 2.6666666666666665,
+    "ratio": 0.6666666666666666,
+    "together": false,
+    "vl": -39.99999999999999
+   },
+   "sim": {
+    "capped": false,
+    "inverted": false,
+    "lsEdge": 2.63529411764706,
+    "nProf": 85,
+    "points": 1682,
+    "ptsHash": "f4284c44eed28e93",
+    "t0": -0.17999999999999997,
+    "t1": 0.17999999999999994
+   }
+  },
+  "B1-R": {
+   "input": {
+    "phiH": 45,
+    "phiV": 30,
+    "side": "R",
+    "theta": 180,
+    "vm": 40,
+    "vo": 20
+   },
+   "model": {
+    "alpha": -4.763641690726179,
+    "beta": -15.225157010677817,
+    "gamma": -18.434948822922014,
+    "ls": 2.666666666666667,
+    "ratio": 0.6666666666666667,
+    "together": false,
+    "vl": -40.00000000000001
+   },
+   "sim": {
+    "capped": false,
+    "inverted": false,
+    "lsEdge": 2.5882352941176476,
+    "nProf": 85,
+    "points": 1682,
+    "ptsHash": "63b60fe0a90be59f",
+    "t0": -0.18000000000000008,
+    "t1": 0.17999999999999997
+   }
+  },
+  "C1-L": {
+   "input": {
+    "phiH": 45,
+    "phiV": 30,
+    "side": "L",
+    "theta": 90,
+    "vm": 40,
+    "vo": 20
+   },
+   "model": {
+    "alpha": 4.763641690726179,
+    "beta": -15.225157010677817,
+    "gamma": -18.434948822922014,
+    "ls": 2.666666666666667,
+    "ratio": 0.6666666666666667,
+    "together": false,
+    "vl": -40.00000000000001
+   },
+   "sim": {
+    "capped": false,
+    "inverted": false,
+    "lsEdge": 2.5882352941176485,
+    "nProf": 85,
+    "points": 1682,
+    "ptsHash": "d5b06972d9ef6225",
+    "t0": -0.18000000000000002,
+    "t1": 0.17999999999999997
+   }
+  },
+  "C1-R": {
+   "input": {
+    "phiH": 45,
+    "phiV": 30,
+    "side": "R",
+    "theta": 90,
+    "vm": 40,
+    "vo": 20
+   },
+   "model": {
+    "alpha": 26.565051177077965,
+    "beta": -39.23152048359223,
+    "gamma": -44.99999999999999,
+    "ls": 8,
+    "ratio": 2,
+    "together": false,
+    "vl": 40
+   },
+   "sim": {
+    "capped": false,
+    "inverted": false,
+    "lsEdge": 7.966804979253114,
+    "nProf": 241,
+    "points": 4764,
+    "ptsHash": "8ba574bf4736d054",
+    "t0": -0.5399999999999999,
+    "t1": 0.54
+   }
+  },
+  "D2-L": {
+   "input": {
+    "phiH": 45,
+    "phiV": 30,
+    "side": "L",
+    "theta": 40,
+    "vm": 40,
+    "vo": 40
+   },
+   "model": {
+    "alpha": 35.35358629694503,
+    "beta": -42.96223805532036,
+    "gamma": -58.10520480365386,
+    "ls": 4.562339522599247,
+    "ratio": 1.1405848806498118,
+    "together": false,
+    "vl": 324.5256176561228
+   },
+   "sim": {
+    "capped": false,
+    "inverted": false,
+    "lsEdge": 4.54795572222117,
+    "nProf": 613,
+    "points": 14200,
+    "ptsHash": "c95e02832e8d83e6",
+    "t0": -0.16992560700939904,
+    "t1": 0.16992560700939904
+   }
+  },
+  "D2-R": {
+   "input": {
+    "phiH": 45,
+    "phiV": 30,
+    "side": "R",
+    "theta": 40,
+    "vm": 40,
+    "vo": 40
+   },
+   "model": {
+    "alpha": -14.957622476515102,
+    "beta": 63.40218684650011,
+    "gamma": -16.777284326629676,
+    "ls": -9.783968679928364,
+    "ratio": -2.445992169982091,
+    "together": false,
+    "vl": 28.39231256865918
+   },
+   "sim": {
+    "capped": false,
+    "inverted": true,
+    "lsEdge": 9.751005240454639,
+    "nProf": 288,
+    "points": 5809,
+    "ptsHash": "ecc9380b0b649638",
+    "t0": -0.6474122630493044,
+    "t1": 0.6474122630493047
+   }
+  },
+  "X01-theta0": {
+   "input": {
+    "phiH": 45,
+    "phiV": 30,
+    "side": "R",
+    "theta": 0,
+    "vm": 30,
+    "vo": 50
+   },
+   "model": {
+    "alpha": -56.490747674657705,
+    "beta": 63.89986121771361,
+    "gamma": -68.19859051364818,
+    "ls": -6,
+    "ratio": -1.5,
+    "together": false,
+    "vl": 30
+   },
+   "sim": {
+    "capped": false,
+    "inverted": true,
+    "lsEdge": 5.950166112956815,
+    "nProf": 301,
+    "points": 5950,
+    "ptsHash": "ccab681c97085711",
+    "t0": -0.54,
+    "t1": 0.5400000000000004
+   }
+  },
+  "X02-theta90": {
+   "input": {
+    "phiH": 45,
+    "phiV": 30,
+    "side": "L",
+    "theta": 90,
+    "vm": 60,
+    "vo": 25
+   },
+   "model": {
+    "alpha": 3.7778340432436908,
+    "beta": -13.503645492738414,
+    "gamma": -16.389540334034788,
+    "ls": 2.823529411764706,
+    "ratio": 0.7058823529411765,
+    "together": false,
+    "vl": -60.00000000000001
+   },
+   "sim": {
+    "capped": false,
+    "inverted": false,
+    "lsEdge": 2.740484429065745,
+    "nProf": 85,
+    "points": 1680,
+    "ptsHash": "1f43e38124c9ca36",
+    "t0": -0.12705882352941178,
+    "t1": 0.12705882352941175
+   }
+  },
+  "X03-theta180": {
+   "input": {
+    "phiH": 45,
+    "phiV": 30,
+    "side": "R",
+    "theta": 180,
+    "vm": 20,
+    "vo": 60
+   },
+   "model": {
+    "alpha": -18.26061693001634,
+    "beta": -31.482154105293855,
+    "gamma": -36.86989764584403,
+    "ls": 1.0000000000000002,
+    "ratio": 0.25000000000000006,
+    "together": false,
+    "vl": -20.000000000000004
+   },
+   "sim": {
+    "capped": false,
+    "inverted": false,
+    "lsEdge": 0.9725274725274726,
+    "nProf": 91,
+    "points": 1800,
+    "ptsHash": "d452fce3cec42782",
+    "t0": -0.13500000000000006,
+    "t1": 0.13499999999999998
+   }
+  },
+  "X04-overelong-L": {
+   "input": {
+    "phiH": 45,
+    "phiV": 30,
+    "side": "L",
+    "theta": 0,
+    "vm": 60,
+    "vo": 60
+   },
+   "model": {
+    "alpha": 26.565051177077965,
+    "beta": 39.23152048359223,
+    "gamma": 45,
+    "ls": "NaN",
+    "ratio": "NaN",
+    "together": true,
+    "vl": 60
+   },
+   "sim": {
+    "capped": true,
+    "inverted": false,
+    "lsEdge": 41.66666666666667,
+    "nProf": 834,
+    "points": 12525,
+    "ptsHash": "50c1cb8f697bfc06",
+    "t0": 0,
+    "t1": 2.5
+   }
+  },
+  "X05-phiV60": {
+   "input": {
+    "phiH": 45,
+    "phiV": 60,
+    "side": "R",
+    "theta": 40,
+    "vm": 40,
+    "vo": 20
+   },
+   "model": {
+    "alpha": -11.44407369998066,
+    "beta": -76.4315150706951,
+    "gamma": 11.777284326629673,
+    "ls": 13.532533416207283,
+    "ratio": 3.3831333540518207,
+    "together": false,
+    "vl": 28.39231256865918
+   },
+   "sim": {
+    "capped": false,
+    "inverted": false,
+    "lsEdge": 13.525586105613245,
+    "nProf": 283,
+    "points": 5710,
+    "ptsHash": "b4eb1069539fd41c",
+    "t0": -0.8954574948456635,
+    "t1": 0.8954574948456633
+   }
+  },
+  "X06-phiV10": {
+   "input": {
+    "phiH": 45,
+    "phiV": 10,
+    "side": "L",
+    "theta": 130,
+    "vm": 40,
+    "vo": 30
+   },
+   "model": {
+    "alpha": 0.2329993541906525,
+    "beta": -5.196008939013086,
+    "gamma": -2.5736398274969665,
+    "ls": 1.944934962818934,
+    "ratio": 0.4862337407047335,
+    "together": false,
+    "vl": -28.39231256865918
+   },
+   "sim": {
+    "capped": false,
+    "inverted": false,
+    "lsEdge": 1.9091806262392823,
+    "nProf": 84,
+    "points": 1691,
+    "ptsHash": "1f4dfe0329ca0ecc",
+    "t0": -0.12869774903771874,
+    "t1": 0.12869774903771877
+   }
+  },
+  "X07-phiH20": {
+   "input": {
+    "phiH": 20,
+    "phiV": 30,
+    "side": "R",
+    "theta": 60,
+    "vm": 50,
+    "vo": 30
+   },
+   "model": {
+    "alpha": 21.498684195046877,
+    "beta": -35.81379007269066,
+    "gamma": -38.777494291672255,
+    "ls": 7.829695992111968,
+    "ratio": 1.957423998027992,
+    "together": false,
+    "vl": 61.33407984528387
+   },
+   "sim": {
+    "capped": false,
+    "inverted": false,
+    "lsEdge": 7.825107756814672,
+    "nProf": 223,
+    "points": 4320,
+    "ptsHash": "b534b53792f679a0",
+    "t0": -0.32618665436178573,
+    "t1": 0.32618665436178573
+   }
+  },
+  "X08-static": {
+   "input": {
+    "phiH": 45,
+    "phiV": 30,
+    "side": "R",
+    "theta": 0,
+    "vm": 40,
+    "vo": 0
+   },
+   "model": {
+    "alpha": 0,
+    "beta": 0,
+    "gamma": 0,
+    "ls": 4,
+    "ratio": 1,
+    "together": false,
+    "vl": 40
+   },
+   "sim": {
+    "capped": false,
+    "inverted": false,
+    "lsEdge": 3.950000000000001,
+    "nProf": 120,
+    "points": 2371,
+    "ptsHash": "7874bbbd85ffcc28",
+    "t0": -0.27000000000000013,
+    "t1": 0.26999999999999996
+   }
+  },
+  "X09-instant": {
+   "input": {
+    "phiH": 45,
+    "phiV": 30,
+    "side": "R",
+    "theta": 135,
+    "vm": 40,
+    "vo": 30
+   },
+   "model": {
+    "alpha": 0,
+    "beta": 0,
+    "gamma": 0,
+    "ls": 4,
+    "ratio": 1,
+    "together": false,
+    "vl": "Infinity"
+   },
+   "sim": {
+    "capped": false,
+    "inverted": false,
+    "lsEdge": 4.000000000000002,
+    "nProf": 2000,
+    "points": 18009,
+    "ptsHash": "8778af6ac3642265",
+    "t0": -0.1272792206135786,
+    "t1": 0.12727922061357855
+   }
+  },
+  "X10-layover-retain": {
+   "input": {
+    "phiH": 45,
+    "phiV": 30,
+    "side": "L",
+    "theta": 0,
+    "vm": 30,
+    "vo": 60
+   },
+   "model": {
+    "alpha": 49.70901360997713,
+    "beta": 58.51784589470611,
+    "gamma": 63.43494882292201,
+    "ls": -4,
+    "ratio": -1,
+    "together": false,
+    "vl": 30
+   },
+   "sim": {
+    "capped": false,
+    "inverted": true,
+    "lsEdge": 4,
+    "nProf": 240,
+    "points": 4745,
+    "ptsHash": "9883ba5c1852c1d7",
+    "t0": -0.36000000000000015,
+    "t1": 0.3599999999999999
+   }
+  }
+ },
+ "engine": "jsc"
+}
