@@ -261,16 +261,27 @@
                     </div>
 
                     <div class="stage">
-                        <div class="canvas-box">
-                            <canvas aria-label="Top-view simulation of the scan" role="img"></canvas>
-                            <div class="canvas-tools"><button type="button" class="pill" id="ex-play">Play scan</button></div>
-                        </div>
-                        <div class="legend" aria-hidden="true">
-                            <span><i class="l-obj"></i>true box at first and last contact</span>
-                            <span><i class="l-now"></i>box during the scan</span>
-                            <span><i class="l-pts" id="ex-pts-swatch"></i>recorded points</span>
-                            <span><i class="l-line"></i>scan line</span>
-                            <span><i class="l-map"></i>mobile mapper</span>
+                        <div class="canvas-row">
+                            <div class="canvas-col">
+                                <div class="canvas-box">
+                                    <canvas aria-label="Top-view simulation of the scan" role="img"></canvas>
+                                    <div class="canvas-tools"><button type="button" class="pill" id="ex-play">Play scan</button></div>
+                                </div>
+                                <div class="legend" aria-hidden="true">
+                                    <span><i class="l-obj"></i>true box at first and last contact</span>
+                                    <span><i class="l-now"></i>box during the scan</span>
+                                    <span><i class="l-pts" id="ex-pts-swatch"></i>recorded points</span>
+                                    <span><i class="l-line"></i>scan line</span>
+                                    <span><i class="l-map"></i>mobile mapper</span>
+                                </div>
+                            </div>
+
+                            <aside class="field" id="ex-field" aria-labelledby="ex-field-title">
+                                <h3 id="ex-field-title">Observed in the field</h3>
+                                <div class="field-body" id="ex-field-body" aria-live="polite">
+                                    <p class="field-empty">Field examples are shown for the thesis test cases (A2, B1).</p>
+                                </div>
+                            </aside>
                         </div>
 
                         <div class="regime" id="ex-regime" aria-live="polite">
@@ -513,7 +524,9 @@
     </footer>
 
     <script src="static/js/nav.js"></script>
+    <script src="static/js/field-data.js"></script>
     <script src="static/js/explorer.js"></script>
+    <script src="static/js/field-panel.js"></script>
     <script>
         // BibTeX: copy to clipboard
         document.querySelectorAll('.bib-copy').forEach(function (btn) {

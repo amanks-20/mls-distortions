@@ -500,6 +500,40 @@ details.more summary { cursor: pointer; color: var(--link); font-size: 15px; }
 
 .check { font-size: 13px; color: var(--muted); }
 
+/* Field-data panel: stacks below the canvas; beside it on wide screens,
+   where the explorer box grows into the margins so the canvas keeps its width */
+.canvas-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.canvas-col { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+@media (min-width: 1340px) {
+    #explorer .explorer { margin-left: -150px; margin-right: -150px; }
+    .canvas-row { grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: start; }
+}
+.field {
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    min-width: 0;
+}
+.field h3 { margin: 0 0 8px; font-size: 15px; font-weight: 600; letter-spacing: 0; }
+.field-body { font-size: 13px; line-height: 1.45; }
+.field-empty { margin: 0; color: var(--muted); }
+.field figure { margin: 0; }
+.field-img {
+    display: block;
+    aspect-ratio: 960 / 600;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: var(--bg-alt);
+}
+.field-img img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.field-img:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+.field figcaption { margin-top: 8px; }
+.field figcaption p { margin: 0 0 6px; }
+.field .field-meta, .field .field-scale, .field .field-credit { color: var(--muted); font-size: 12px; }
+.field .field-meta strong { color: var(--text); font-weight: 600; }
+
 /* ---------- Stats ---------- */
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 20px 0; }
 @media (max-width: 640px) { .stats { grid-template-columns: repeat(2, 1fr); } }
