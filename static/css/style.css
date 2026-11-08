@@ -517,6 +517,11 @@ details.more summary { cursor: pointer; color: var(--link); font-size: 15px; }
     #explorer .explorer { margin-left: -150px; margin-right: -150px; }
     .canvas-row { grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: start; }
 }
+/* Stacked layout: the panel comes after the readouts (canvas, readouts, panel) */
+@media (max-width: 1339.98px) {
+    .canvas-row { display: contents; }
+    .stage > .canvas-row > .field { order: 1; }
+}
 .field {
     padding: 14px 16px;
     border-radius: 12px;
