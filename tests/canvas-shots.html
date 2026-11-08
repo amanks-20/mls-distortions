@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Canvas shots (dev only)</title>
+<!-- Dev-only contact sheet. /tests/canvas-shots.html?cases=A1,B1,A2&view=3d[&extra=phiV:70]
+     Loads /index.html?case=…&view=… in an iframe per case and shows the
+     explorer canvas as an image, with the 3D notes text underneath. -->
+<style>
+  :root { color-scheme: light dark; }
+  body { margin: 12px; font: 12px -apple-system, sans-serif; background: Canvas; color: CanvasText; }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; }
+  figure { margin: 0; width: 572px; }
+  img { width: 572px; height: 360px; border: 1px solid #8884; border-radius: 8px; display: block; }
+  figcaption { margin-top: 4px; }
+  iframe { position: absolute; left: -99999px; width: 1440px; height: 2400px; }
+</style>
+</head>
+<body>
+<div class="row" id="row"></div>
+<pre id="out">pending</pre>
+<script>
+(async function () {
+    var q = new URLSearchParams(location.search);
+    var cases = (q.get('cases') || 'A1').split(','), view = q.get('view') || '3d', side = q.get('side') || 'R';
+    var extra = q.get('extra');            // e.g. phiV:70 -> sets that slider after load
+    function load(src) {
+        return new Promise(function (ok) {
+            var f = document.createElement('iframe');
+            f.onload = function () { setTimeout(function () { ok(f); }, 500); };
+            f.src = src; document.body.appendChild(f);
+        });
+    }
+    var log = [];
+    for (var c of cases) {
+        var f = await load('/index.html?case=' + c + '&side=' + side + '&view=' + view + (q.get('t') ? '&t=' + q.get('t') : ''));
+        var d = f.contentDocument;
+        if (extra) {
+            var kv = extra.split(':'), inp = d.getElementById('ex-' + kv[0].toLowerCase());
+            inp.value = kv[1]; inp.dispatchEvent(new Event('input'));
+            await new Promise(function (r) { setTimeout(r, 300); });
+        }
+        var cv = d.querySelector('#explorer canvas');
+        var fig = document.createElement('figure'), img = document.createElement('img'), cap = document.createElement('figcaption');
+        img.src = cv.toDataURL('image/png');
+        var notes = d.getElementById('ex-3d-notes');
+        var txt = notes && !notes.hidden ? Array.from(notes.querySelectorAll('p')).filter(function (p) { return !p.hidden; }).map(function (p) { return p.textContent; }).join(' | ') : '(2D)';
+        cap.textContent = c + '-' + side + (extra ? ' ' + extra : '') + ': ' + txt;
+        fig.appendChild(img); fig.appendChild(cap); document.getElementById('row').appendChild(fig);
+        log.push(cap.textContent);
+        f.remove();
+    }
+    document.getElementById('out').textContent = 'DONE\n' + log.join('\n');
+})();
+</script>
+</body>
+</html>

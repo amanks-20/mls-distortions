@@ -249,6 +249,9 @@
 
     function draw(progress) {
         lastProgress = progress;
+        // Optional 3D view (static/js/view3d.js): when active it draws this frame instead
+        var v3 = window.mlsView3D;
+        if (v3 && v3.active()) { v3.draw(canvas, ctx, state, progress, DENSITY[density]); return; }
         var dpr = window.devicePixelRatio || 1;
         var W = canvas.clientWidth, H = canvas.clientHeight;
         if (canvas.width !== Math.round(W * dpr) || canvas.height !== Math.round(H * dpr)) {
@@ -491,4 +494,6 @@
     // Exposed for testing in the console
     window.mlsModel = model;
     window.mlsSimulate = simulate;
+    // Redraw the current frame (used by the 3D view after rotate/zoom/toggle)
+    window.mlsRedraw = function () { if (!anim) draw(lastProgress); };
 })();

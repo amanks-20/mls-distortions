@@ -258,6 +258,13 @@
                             </div>
                             <span class="hint">Display only: thins the drawn points, not the simulation</span>
                         </div>
+                        <div class="ctrl">
+                            <label>View</label>
+                            <div class="seg" role="group" aria-label="View">
+                                <button type="button" data-view="2d" aria-pressed="true">2D top view</button>
+                                <button type="button" data-view="3d" aria-pressed="false">3D</button>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="stage">
@@ -265,7 +272,12 @@
                             <div class="canvas-col">
                                 <div class="canvas-box">
                                     <canvas aria-label="Top-view simulation of the scan" role="img"></canvas>
-                                    <div class="canvas-tools"><button type="button" class="pill" id="ex-play">Play scan</button></div>
+                                    <div class="canvas-tools"><button type="button" class="pill" id="ex-3d-reset" hidden>Reset view</button> <button type="button" class="pill" id="ex-play">Play scan</button></div>
+                                </div>
+                                <div class="ex3d-notes" id="ex-3d-notes" hidden>
+                                    <p class="ex3d-warn" id="ex-3d-notop" role="status" hidden>The scan plane misses the top face at this angle.</p>
+                                    <p id="ex-3d-hs"></p>
+                                    <p>The readouts and the “Simulation” line below still describe the top-view (2D) model.</p>
                                 </div>
                                 <div class="legend" aria-hidden="true">
                                     <span><i class="l-obj"></i>true box at first and last contact</span>
@@ -526,6 +538,8 @@
     <script src="static/js/nav.js"></script>
     <script src="static/js/field-data.js"></script>
     <script src="static/js/explorer.js"></script>
+    <script src="static/js/simulate3d.js"></script>
+    <script src="static/js/view3d.js"></script>
     <script src="static/js/field-panel.js"></script>
     <script>
         // BibTeX: copy to clipboard
