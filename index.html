@@ -249,6 +249,15 @@
                             <input id="ex-phiv" type="range" min="0" max="70" step="1" value="30">
                             <span class="hint">Affects β and α only (the top view is unchanged)</span>
                         </div>
+                        <div class="ctrl">
+                            <label>Point density</label>
+                            <div class="seg" role="group" aria-label="Point density (display only)">
+                                <button type="button" data-density="dense" aria-pressed="false">Dense</button>
+                                <button type="button" data-density="medium" aria-pressed="true">Medium</button>
+                                <button type="button" data-density="sparse" aria-pressed="false">Sparse</button>
+                            </div>
+                            <span class="hint">Display only: thins the drawn points, not the simulation</span>
+                        </div>
                     </div>
 
                     <div class="stage">

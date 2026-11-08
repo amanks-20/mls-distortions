@@ -181,7 +181,74 @@
 
     function css(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 
+    // ---------- Display-only point thinning ----------
+    // The simulation samples very finely (profiles ≤ 0.05 m apart, points
+    // ≤ 0.1 m along a profile), which draws as a solid fill. For display we
+    // keep every n-th profile and every m-th point along a profile so that
+    // neighbouring dots sit about DENSITY[density] CSS px apart on screen.
+    // The first/last profile and both ends of every profile are always kept,
+    // so the outline of the cloud (front, back, layover) stays sharp.
+    var PT_RADIUS = 1.6;                                     // CSS px; the canvas is already scaled by devicePixelRatio
+    var DENSITY = { dense: 4, medium: 7, sparse: 11 };       // target on-screen spacing (CSS px)
+    var density = 'medium';
+    var spacing = null, mask = null;                         // caches
+
+    function median(a) {
+        if (!a.length) return 0;
+        a.sort(function (x, y) { return x - y; });
+        return a[a.length >> 1];
+    }
+
+    // World spacing of the raw samples: along a profile (dA) and between
+    // consecutive profiles, measured across the scan line (dP).
+    function rawSpacing() {
+        if (spacing && spacing.sim === sim) return spacing;
+        var pts = sim.pts, n = pts.length;
+        var j = new Int32Array(n), count = {}, first = {}, last = {};
+        for (var k = 0; k < n; k++) {
+            var i = pts[k].i;
+            if (!(i in count)) { count[i] = 0; first[i] = k; }
+            j[k] = count[i]++;
+            last[i] = k;
+        }
+        var ids = Object.keys(count).map(Number).sort(function (x, y) { return x - y; });
+        var perp = [-sim.d[1], sim.d[0]], dA = [], dP = [];
+        ids.forEach(function (i, q) {
+            var a = pts[first[i]], b = pts[last[i]];
+            if (count[i] > 1) dA.push(Math.hypot(b.x - a.x, b.y - a.y) / (count[i] - 1));
+            if (q) {
+                var i0 = ids[q - 1], c = pts[first[i0]];
+                dP.push(Math.abs((a.x - c.x) * perp[0] + (a.y - c.y) * perp[1]) / (i - i0));
+            }
+        });
+        spacing = { sim: sim, j: j, count: count, iMin: ids[0], iMax: ids[ids.length - 1], dA: median(dA), dP: median(dP) };
+        return spacing;
+    }
+
+    // Evenly spaced picks from 0..len-1 that always include both ends
+    function picked(idx, len, stride) {
+        if (len <= 1 || stride <= 1) return true;
+        var nk = Math.max(1, Math.round((len - 1) / stride));
+        return idx === Math.round(Math.round(idx * nk / (len - 1)) * (len - 1) / nk);
+    }
+
+    function displayMask(scale) {
+        if (mask && mask.sim === sim && mask.scale === scale && mask.density === density) return mask.keep;
+        var sp = rawSpacing(), target = DENSITY[density];
+        var sP = sp.dP > 1e-9 ? Math.max(1, Math.round(target / (sp.dP * scale))) : 1;
+        var sA = sp.dA > 1e-9 ? Math.max(1, Math.round(target / (sp.dA * scale))) : 1;
+        var keep = new Uint8Array(sim.pts.length), nI = sp.iMax - sp.iMin + 1;
+        sim.pts.forEach(function (p, k) {
+            keep[k] = picked(p.i - sp.iMin, nI, sP) && picked(sp.j[k], sp.count[p.i], sA) ? 1 : 0;
+        });
+        mask = { sim: sim, scale: scale, density: density, keep: keep };
+        return keep;
+    }
+
+    var lastProgress = 1;
+
     function draw(progress) {
+        lastProgress = progress;
         var dpr = window.devicePixelRatio || 1;
         var W = canvas.clientWidth, H = canvas.clientHeight;
         if (canvas.width !== Math.round(W * dpr) || canvas.height !== Math.round(H * dpr)) {
@@ -235,14 +302,18 @@
         poly(first, muted, null, [5, 4]);
         poly(last, muted, null, [5, 4]);
 
-        // Points captured so far
+        // Points captured so far: round dots of fixed on-screen size,
+        // thinned for display only (sim.pts itself is never changed)
+        var keep = displayMask(scale);
         ctx.fillStyle = ptCol;
-        var r = Math.max(1.1, Math.min(2.2, scale * 0.05));
-        var stride = Math.max(1, Math.round(sim.nProf / 70));
-        sim.pts.forEach(function (p) {
-            if (p.t > tNow + 1e-9 || p.i % stride) return;
-            ctx.fillRect(X(p.x) - r, Y(p.y) - r, 2 * r, 2 * r);
+        ctx.beginPath();
+        sim.pts.forEach(function (p, k) {
+            if (!keep[k] || p.t > tNow + 1e-9) return;
+            var px = X(p.x), py = Y(p.y);
+            ctx.moveTo(px + PT_RADIUS, py);
+            ctx.arc(px, py, PT_RADIUS, 0, 2 * Math.PI);
         });
+        ctx.fill();
 
         // Box now, with front marker
         if (progress < 1) {
@@ -374,6 +445,16 @@
     });
     sideBtns.forEach(function (b) { b.addEventListener('click', function () { state.side = b.dataset.side; update(); }); });
     playBtn.addEventListener('click', play);
+
+    // Point density (display only)
+    var densityBtns = root.querySelectorAll('[data-density]');
+    densityBtns.forEach(function (b) {
+        b.addEventListener('click', function () {
+            density = b.dataset.density;
+            densityBtns.forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+            if (!anim) draw(lastProgress);
+        });
+    });
 
     // Presets: test cases from the thesis (speeds there are in cm/s; only ratios matter)
     var PRESETS = {
