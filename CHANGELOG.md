@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Reset view button is hidden in the 2D view and shown only in 3D.
+- Below 1340 px, the field panel now comes after the readouts (canvas, readouts, field panel).
+
 ## v1.1.0
 
 - Point density control (Dense / Medium / Sparse) for the explorer canvas; display only, the simulation and readouts are unchanged.
