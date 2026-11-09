@@ -10,8 +10,11 @@
    - frame: x = mapper direction of travel, y = mapper's left, z up (paper/thesis Ch. 5)
    - mapper/scanner at (vm·t, 0, H_SCANNER); object of 4 x 2 x 1.5 m on flat
      ground (z = 0), heading θ, starting at the same position c0 as simulate()
-   - scan plane normal N = (cos φh cos φv, ±sin φh cos φv, sin φv),
-     + for the right scanner, − for the left (φh -> −φh), thesis p.60–61
+   - scan plane normal N = (cos φh cos φv, ±sin φh cos φv, −sin φv),
+     + for the right scanner, − for the left (φh -> −φh); horizontal part as
+     thesis p.60–61. The vertical tilt follows the mounting figure (thesis
+     Fig. 3.1a, paper Fig. 2): the plane's upper half leans towards the
+     direction of motion. The magnitudes of γ, β and α do not depend on this sign.
    - profiles are instantaneous; profile step ≤ 0.05 m, point step ≤ 0.1 m,
      scan-time caps as in simulate(). The contact window [t0, t1] is computed
      for the 3D plane and the 3D box, because the tilted plane meets the box
@@ -45,13 +48,14 @@
     }
 
     // Scan plane at time t: origin = scanner position (vm·t, 0, H), unit
-    // normal N = (cos φh cos φv, ±sin φh cos φv, sin φv), + right, − left.
+    // normal N = (cos φh cos φv, ±sin φh cos φv, −sin φv), + right, − left;
+    // the minus on the z-component makes the upper half lean towards +x.
     function scanPlane(s, side, t, opts) {
         var vm = s.vm * (1 / 3.6), ph = s.phiH * D2R, pv = s.phiV * D2R;
         var sg = side === 'R' ? 1 : -1;
         return {
             origin: [vm * t, 0, scannerHeight(opts)],
-            normal: [Math.cos(ph) * Math.cos(pv), sg * Math.sin(ph) * Math.cos(pv), Math.sin(pv)]
+            normal: [Math.cos(ph) * Math.cos(pv), sg * Math.sin(ph) * Math.cos(pv), -Math.sin(pv)]
         };
     }
 

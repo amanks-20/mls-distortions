@@ -15,30 +15,65 @@ window.mlsScanPlane(state, side, t) returns, the helper the 3D view draws.
 Lengths are compared, not absolute positions or times (the scanner height
 shifts those). Tolerance: TOL_LEN metres (two profile steps of 0.05 m).
 
-A2 LIMITS IN (b)
-A2 is exact over-elongation: the scan plane moves with the object, so it keeps
-cutting ONE frozen slice of the box for the whole scan. Which slice it is is
-fixed by the start position (the box is centred on the explorer's 2D ground
-line, as in simulate()), not by the physics of the distortion. In 3D the plane
-meets the top face (z = 1.5 m) as the line  n_h . q = shift  in the box frame
-(q relative to the box centre, n_h the unit horizontal plane normal, u/w the
-box's long/short axes), with
-    shift = tan(phiV) * (H_SCANNER - 1.5)
-Two limits follow, both computed in code (a2_limits):
-  1. top face crossed:     |shift| <  L/2 |n_h.u| + W/2 |n_h.w|
-     (no top-face points at all above it; test b2)
-  2. measured edge crossed: the edge simulate() measures is the top-face long
-     edge q.w = +W/2. The line meets it at q.u = (shift - W/2 n_h.w) / n_h.u,
+A2 GEOMETRY, LIMITS IN (b), AND TESTS b2-b4
+Derived here from the plane's geometry, not read from simulate3d.js.
+
+Plane. The scan plane at time t is N . (p - S(t)) = 0 with scanner
+S(t) = (vm t, 0, H), H = H_SCANNER, and unit normal
+    N = (cos(phiV) n_h, -sin(phiV)),   n_h = (cos phiH, +-sin phiH)  (+ right, - left)
+Its upper half leans towards the direction of motion: moving up the plane
+(steepest ascent), x increases by tan(phiV) cos(phiH) per metre of height
+(test f checks this without reading the sign from the code).
+
+A2 is a frozen slice. A2 has theta = 0 and vo = vm, so the box centre
+C(t) = c0 + vm t x and C(t) - S(t) = c0 - H z for every t: the plane cuts ONE
+slice of the box for the whole scan. Which slice is fixed by the start
+position (the box is centred on the explorer's 2D ground line, as in
+simulate(), so n_h . c0 = 0), not by the physics of the distortion. Write a
+box point as p = C(t) + q + z z (q horizontal, relative to the box centre,
+z the height above the ground; u, w the box's long and short axes). Then
+    cos(phiV) n_h . q - sin(phiV) (z - H) = 0   =>   n_h . q = tan(phiV) (z - H)     (*)
+(the previous sign gave n_h . q = tan(phiV) (H - z)).
+
+Where (*) cuts the faces (box L x W x HGT = 4 x 2 x 1.5 m):
+  top face z = HGT:       n_h . q = shift,   shift = -tan(phiV) (H - HGT)  (<= 0 for phiV >= 0)
+  side faces q.w = +-W/2: q.u = (tan(phiV) (z - H) -+ W/2 n_h.w) / n_h.u
+  front/back q.u = +-L/2: q.w = (tan(phiV) (z - H) -+ L/2 n_h.u) / n_h.w
+
+Limits (computed in a2_limits):
+  1. top face crossed iff |shift| < L/2 |n_h.u| + W/2 |n_h.w|. This is
+     symmetric in the sign of shift. At phiH = 45, theta = 0 it is 2.121 m,
+     phiV < 64.76 deg for both sides at H = 2.5 m (test b2).
+  2. measured edge crossed: simulate() measures the top-face long edge
+     q.w = +W/2. The top-face line meets it at q.u = (shift - W/2 n_h.w) / n_h.u,
      which must lie within +-L/2:
          W/2 n_h.w - L/2 |n_h.u|  <=  shift  <=  W/2 n_h.w + L/2 |n_h.u|
-     n_h.w changes sign with the scanner side (phiH -> -phiH for the left
-     scanner), so this limit is different for L and R.
-     Above it the edge has no points and the length falls back to the extent
-     of the whole top-face cloud, which adds the slice's own length along u
-     (test b3).
+     For phiV >= 0, shift <= 0 < the upper bound, so the LOWER bound binds:
+         tan(phiV) (H - HGT) <= L/2 |n_h.u| - W/2 n_h.w
+     n_h.w = +sin phiH for the right scanner and -sin phiH for the left, so
+       right: 0.707 m -> phiV <= 35.26 deg;  left: 2.121 m -> phiV <= 64.76 deg
+     (H = 2.5 m). The left limit equals limit 1, so no tested phiV lies
+     between the two for the left scanner. With the previous sign the upper
+     bound bound instead, and the two sides were swapped (R 64.76, L 35.26).
+     Above limit 2 the edge has no points and the length falls back to the
+     extent of the whole top-face cloud, which adds the slice's own length
+     along u (test b3).
+  3. faces with points (test b4, phiV = 30 deg): (*) crosses a face iff
+     f = n_h . q - tan(phiV) (z - H) takes both signs over the face's corners.
+     The scanner sits at s = -c0 + H z relative to the box (constant in A2;
+     c0 = d * 7 / d_y with d the 2D ground-line direction), and a face has
+     points only if s is on its outer side. Predicted at H = 2.5 m:
+       right (c0 = (-7, 7)): top and near side (q.w = -W/2); not the front
+       left  (c0 = (+7, 7)): top, near side (only z >= 1.27 m) and the back
 (b) runs A2 only at phiV below limit 2 for its side (limit 2 <= limit 1); all
-other presets keep the full 0-70 deg range. b2 and b3 predict and assert the
-behaviour above the limits.
+other presets keep the full 0-70 deg range. b2, b3 and b4 predict and assert
+the behaviour above the limits and the faces hit.
+
+(f) Orientation, with expected values written from the geometric statement
+above (not from the code): at phiH = 45, phiV = 30 the normals are
+left (+0.612, -0.612, -0.500) and right (+0.612, +0.612, -0.500); the in-plane
+UP direction leans forward (+x) with x/z = +0.408; the lower half leans
+backward; the ground trace runs forward-left (left) and forward-right (right).
 """
 import math
 import re
@@ -84,17 +119,51 @@ def a2_geom(side):
     return n[0] * u[0] + n[1] * u[1], n[0] * w[0] + n[1] * w[1]   # n.u, n.w
 
 
-def phiv_of_shift(shift, H):
-    return math.degrees(math.atan(shift / (H - HGT))) if shift > 0 else 0.0
+def phiv_of_depth(depth, H):
+    """phiV at which the top-face line sits `depth` metres from the box centre (|shift| = depth)."""
+    return math.degrees(math.atan(depth / (H - HGT))) if depth > 0 else 0.0
 
 
 def a2_limits(side, H):
-    """Both A2 limits (see module docstring): shifts in m and the phiV they correspond to."""
+    """Both A2 limits (see module docstring): shifts in m and the phiV they correspond to.
+    shift = -tan(phiV) (H - HGT) <= 0, so the measured-edge limit is set by the lower bound edge_lo."""
     nu, nw = a2_geom(side)
     top = LEN / 2 * abs(nu) + WID / 2 * abs(nw)
     edge_lo, edge_hi = WID / 2 * nw - LEN / 2 * abs(nu), WID / 2 * nw + LEN / 2 * abs(nu)
-    return dict(top_shift=top, top_phiv=phiv_of_shift(top, H),
-                edge_lo=edge_lo, edge_hi=edge_hi, edge_phiv=phiv_of_shift(edge_hi, H))
+    return dict(top_shift=top, top_phiv=phiv_of_depth(top, H),
+                edge_lo=edge_lo, edge_hi=edge_hi, edge_phiv=phiv_of_depth(-edge_lo, H))
+
+
+def a2_faces(side, phiv, H):
+    """Faces of the A2 frozen slice that have points (module docstring, limit 3), from the geometry."""
+    ph = math.radians(PHI_H)
+    sg = 1 if side == "R" else -1
+    n = (math.cos(ph), sg * math.sin(ph))
+    d = (-n[1], n[0])
+    if d[1] < 0:
+        d = (-d[0], -d[1])
+    c0 = (d[0] * 7 / d[1], d[1] * 7 / d[1])                 # start: 2D ground line, 7 m to the side
+    s = (-c0[0], -c0[1], H)                                  # scanner relative to the box centre (theta = 0)
+    tv = math.tan(math.radians(phiv))
+    def fval(qu, qw, z):
+        return n[0] * qu + n[1] * qw - tv * (z - H)          # (*) with u = x, w = y at theta = 0
+    L2, W2 = LEN / 2, WID / 2
+    faces = {   # outward normal (u, w, z), corners (qu, qw, z)
+        "front": ((1, 0, 0), [(L2, a, z) for a in (-W2, W2) for z in (0, HGT)]),
+        "back": ((-1, 0, 0), [(-L2, a, z) for a in (-W2, W2) for z in (0, HGT)]),
+        "side+": ((0, 1, 0), [(a, W2, z) for a in (-L2, L2) for z in (0, HGT)]),
+        "side-": ((0, -1, 0), [(a, -W2, z) for a in (-L2, L2) for z in (0, HGT)]),
+        "top": ((0, 0, 1), [(a, b, HGT) for a in (-L2, L2) for b in (-W2, W2)]),
+    }
+    hit = set()
+    for name, (nf, corners) in faces.items():
+        vals = [fval(*c) for c in corners]
+        crossed = min(vals) < 0 < max(vals)
+        cen = [sum(c[k] for c in corners) / 4 for k in range(3)]
+        seen = sum((s[k] - cen[k]) * nf[k] for k in range(3)) > 0
+        if crossed and seen:
+            hit.add("side" if name.startswith("side") else name)
+    return hit
 
 
 def a2_slice_u_extent(side, shift):
@@ -134,7 +203,8 @@ def a2_top_points(side, phiv):
 
 
 def a2_shift(phiv, H):
-    return math.tan(math.radians(phiv)) * (H - HGT)
+    """Signed top-face shift of (*): n_h . q = -tan(phiV) (H - HGT)."""
+    return -math.tan(math.radians(phiv)) * (H - HGT)
 
 
 def f(x, w=7, p=3):
@@ -206,7 +276,7 @@ def main():
     tested = sorted({c["phiV"] for c in r["b"]})
     for side in ("L", "R"):
         L_ = LIM[side]
-        above = [p for p in tested if p >= L_["edge_phiv"] and a2_shift(p, H) < L_["top_shift"]]
+        above = [p for p in tested if p >= L_["edge_phiv"] and abs(a2_shift(p, H)) < L_["top_shift"]]
         if not above:
             print(f"A2-{side:3} none: no tested phiV lies between the edge limit ({L_['edge_phiv']:.2f}°) "
                   f"and the top-face limit ({L_['top_phiv']:.2f}°)")
@@ -233,10 +303,20 @@ def main():
         if not ok:
             fails.append(f"(b3) A2-{side} phiV={pv}: predicted edge points {pred_edge}, observed {edge_n}; "
                          f"length {length:.3f} vs whole {whole:.3f}; offset {offset:.3f} vs slice {slice_u:.3f}")
-        print(f"A2-{side:3} {pv:5d} {shift:8.3f} {L_['edge_hi']:8.3f}  {('some' if pred_edge else 'none'):>14} {edge_n:13d}  "
+        print(f"A2-{side:3} {pv:5d} {shift:8.3f} {L_['edge_lo']:8.3f}  {('some' if pred_edge else 'none'):>14} {edge_n:13d}  "
               f"{length:8.3f} {whole:9.3f}  {offset:7.3f} {slice_u:8.3f}" + ("" if ok else "   <-- DIFFERS"))
     print("  length = reported top-face length; whole ext = extent of all top-face points along u;")
     print("  offset = length - vo x scan time (the streak the edge would give); slice u = chord of the frozen slice along u")
+    print("  edge lim = the binding (lower) bound of the measured-edge range, in m")
+
+    print(f"\n(b4) A2 faces with points at phiV = 30° (default H_SCANNER): predicted from the geometry vs observed")
+    for side in ("L", "R"):
+        pred = a2_faces(side, 30, H)
+        obs = {k for k, v in next(s for s in r["sanity"] if s["id"] == f"A2-{side}")["faces"].items() if v > 0}
+        ok = pred == obs
+        if not ok:
+            fails.append(f"(b4) A2-{side}: predicted faces {sorted(pred)}, observed {sorted(obs)}")
+        print(f"A2-{side:3} predicted {sorted(pred)}  observed {sorted(obs)}" + ("" if ok else "   <-- DIFFERS"))
 
     print("\n(c) Static object (vo = 0): top-face edge length and footprint should be 4 m x 2 m")
     print(f"{'case':7} {'edge':>8} {'ext u':>8} {'ext w':>8}  inverted")
@@ -284,13 +364,36 @@ def main():
             fails.append(f"(e) {c['id']} phiV={c['phiV']} H={c['h']}: {c['n']} points, worst {c['worst']:.2e}")
         print(f"{c['id']:7} {c['phiV']:5d} {c['h']:5.1f} {c['n']:7d} {c['worst']:9.1e}" + ("" if ok else "   <-- FAILS"))
 
+    print("\n(f) Orientation at phiH = 45°, phiV = 30° (expected values from the geometric statement, not the code)")
+    EXP_N = {"L": (0.612, -0.612, -0.500), "R": (0.612, 0.612, -0.500)}     # listed to 3 decimals
+    EXP_UP_XZ = 0.408                                                      # tan(phiV) cos(phiH), 3 decimals
+    EXP_TRACE_Y = {"L": +1, "R": -1}                                       # forward (+x) trace goes left (+y) / right (-y)
+    for side in ("L", "R"):
+        nrm = r["orient"][side]["normal"]
+        up = [-nrm[2] * nrm[0], -nrm[2] * nrm[1], 1 - nrm[2] ** 2]          # vertical projected onto the plane
+        down = [-c for c in up]
+        tr = [-nrm[1], nrm[0]]                                              # horizontal line in the plane
+        if tr[0] < 0:
+            tr = [-tr[0], -tr[1]]                                           # its forward-pointing direction
+        checks = [
+            ("normal", all(abs(a - b) <= 5e-4 for a, b in zip(nrm, EXP_N[side])), "(" + ", ".join(f"{c:+.3f}" for c in nrm) + ")"),
+            ("upper half forward, x/z", up[0] > 0 and abs(up[0] / up[2] - EXP_UP_XZ) <= 5e-4, f"{up[0] / up[2]:+.4f}"),
+            ("lower half backward", down[0] < 0 and down[2] < 0, f"down x {down[0]:+.3f}"),
+            ("ground trace forward-" + ("left" if side == "L" else "right"),
+             tr[0] > 0 and (tr[1] > 0) == (EXP_TRACE_Y[side] > 0) and abs(tr[1]) > 1e-9, f"({tr[0]:+.3f}, {tr[1]:+.3f})"),
+        ]
+        for name, ok, got in checks:
+            if not ok:
+                fails.append(f"(f) {side} {name}: {got}")
+            print(f"  {side} {name:32} {got:>26}  " + ("ok" if ok else "<-- FAILS"))
+
     print()
     if fails:
         print(f"FAIL: {len(fails)} check(s) differ")
         for x in fails:
             print("  " + x)
         return 1
-    print("PASS: all 3D checks agree (a, b, b2, b3, c, d, sanity, e)")
+    print("PASS: all 3D checks agree (a, b, b2, b3, b4, c, d, sanity, e, f)")
     return 0
 
 

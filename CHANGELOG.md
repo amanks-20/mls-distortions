@@ -5,6 +5,7 @@
 - Reset view button is hidden in the 2D view and shown only in 3D.
 - Below 1340 px, the field panel now comes after the readouts (canvas, readouts, field panel).
 - 3D: draw the selected scanner's scan plane, with an on/off toggle.
+- 3D: scan-plane vertical tilt follows the mounting figure (upper half leans towards the direction of motion).
 
 ## v1.1.0
 

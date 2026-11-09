@@ -101,7 +101,10 @@
         return worst;
     }
 
-    var out = { a: [], b: [], c: [], d: [], sanity: [], plane: [] };
+    var out = { a: [], b: [], c: [], d: [], sanity: [], plane: [], orient: {} };
+    ['L', 'R'].forEach(function (side) {
+        out.orient[side] = plane({ vm: 40, vo: 20, theta: 0, side: side, phiH: 45, phiV: 30 }, side, 0);
+    });
     Object.keys(PRESETS).forEach(function (id) {
         ['L', 'R'].forEach(function (side) {
             var s = state(id, side);
