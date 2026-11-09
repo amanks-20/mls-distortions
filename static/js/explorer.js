@@ -24,6 +24,18 @@
     var OVER_SCAN_TIME = 2.5;   // scan time shown for exact over-elongation (s)
     var MAX_SCAN_TIME = 30;     // cap for near over-elongation (s)
 
+    // Scanner mounting positions on the drawn mapper, relative to the centre of
+    // its 4.5 m x 1.8 m body (x forward, y left), in metres. DISPLAY ONLY and
+    // ILLUSTRATIVE: the thesis and paper figures show the scanners at the rear
+    // of the roof, left and right, but give no dimensions. Rear-left and
+    // rear-right corners, inset 0.55 m from the rear and 0.25 m from the sides.
+    // The simulation keeps the selected scanner at the origin; at draw time
+    // every scene element (cloud, boxes, scan line or plane, scanner marker) is
+    // translated by the selected scanner's offset while the mapper body stays
+    // put, so the point cloud itself is unchanged. Shared with view3d.js.
+    var MOUNT = { L: [-1.7, 0.65], R: [-1.7, -0.65] };
+    window.mlsScannerMount = MOUNT;
+
     var state = { vm: 40, vo: 20, theta: 0, side: 'R', phiH: 45, phiV: 30 };
 
     // ---------- Closed-form model (paper, Section "Derivation") ----------
@@ -277,6 +289,25 @@
         var minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
         var cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
         var span = Math.max(maxX - minX, (maxY - minY) * W / H, 8);
+        // Display translation: the scene moves with the selected scanner's
+        // mounting offset, the mapper body does not. The fit above is computed
+        // as before, in the scene's frame. Relative to the scene the body sits
+        // at -offset; only if its footprint there would leave the fitted window
+        // is the window panned by the overflow, and only if it cannot fit at this
+        // scale is the view widened. Otherwise the scene is framed exactly as before.
+        var off = MOUNT[state.side], offO = MOUNT[state.side === 'R' ? 'L' : 'R'];
+        var S = function (p) { return [p[0] + off[0], p[1] + off[1]]; };
+        var bx = [sim.vm * sim.t0 - 2.5 - off[0], sim.vm * sim.t1 + 2.5 - off[0]], by = [-1.2 - off[1], 1.2 - off[1]];
+        var fitAxis = function (c, half, lo, hi, blo, bhi) {      // window [c - half, c + half] must hold [lo, hi] and [blo, bhi]
+            var a = Math.min(lo, blo), b = Math.max(hi, bhi);
+            if (a >= c - half && b <= c + half) return { c: c, half: half };
+            if (b - a <= 2 * half) return { c: Math.min(Math.max(c, b - half), a + half), half: half };
+            return { c: (a + b) / 2, half: (b - a) / 2 };
+        };
+        var fx = fitAxis(cx, span / 2, minX, maxX, bx[0], bx[1]);
+        var fy = fitAxis(cy, span * H / W / 2, minY, maxY, by[0], by[1]);
+        span = Math.max(2 * fx.half, 2 * fy.half * W / H);
+        cx = fx.c + off[0]; cy = fy.c + off[1];
         var scale = (W - 60) / span;
         var X = function (x) { return W / 2 + (x - cx) * scale; };
         var Y = function (y) { return H / 2 - (y - cy) * scale; };
@@ -284,6 +315,8 @@
         var muted = css('--muted'), line = css('--line'), text = css('--text');
         var ptCol = state.side === 'R' ? css('--right') : css('--left');
         var objCol = css('--object');
+        // Dev-only draw record (window.mlsRecordDraw = true): display coordinates of what is drawn
+        var rec = window.mlsRecordDraw ? { view: '2d', off: off, offOther: offO, fit: { cx: cx, cy: cy, scale: scale, W: W, H: H }, pts: [], boxes: {} } : null;
 
         // Metre grid
         var step = span > 60 ? 10 : span > 25 ? 5 : 1;
@@ -302,8 +335,10 @@
         }
 
         // True box at first and last contact
-        poly(first, muted, null, [5, 4]);
-        poly(last, muted, null, [5, 4]);
+        var firstD = first.map(S), lastD = last.map(S);
+        poly(firstD, muted, null, [5, 4]);
+        poly(lastD, muted, null, [5, 4]);
+        if (rec) { rec.boxes.first = firstD; rec.boxes.last = lastD; }
 
         // Points captured so far: round dots of fixed on-screen size,
         // thinned for display only (sim.pts itself is never changed)
@@ -312,7 +347,8 @@
         ctx.beginPath();
         sim.pts.forEach(function (p, k) {
             if (!keep[k] || p.t > tNow + 1e-9) return;
-            var px = X(p.x), py = Y(p.y);
+            var px = X(p.x + off[0]), py = Y(p.y + off[1]);
+            if (rec) rec.pts.push([k, p.x + off[0], p.y + off[1]]);
             ctx.moveTo(px + PT_RADIUS, py);
             ctx.arc(px, py, PT_RADIUS, 0, 2 * Math.PI);
         });
@@ -320,20 +356,22 @@
 
         // Box now, with front marker
         if (progress < 1) {
-            var now = objAt(tNow);
+            var now = objAt(tNow).map(S);
             poly(now, objCol, hexA(objCol, 0.22));
+            if (rec) rec.boxes.now = now;
             var fx = (now[0][0] + now[1][0]) / 2, fy = (now[0][1] + now[1][1]) / 2;
             ctx.fillStyle = text; ctx.font = '600 11px ' + css('--font');
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             ctx.fillText('F', X(fx + sim.u[0] * 0.6), Y(fy + sim.u[1] * 0.6));
 
-            // Scan line through the scanner, clipped to the view
-            var sx = sim.vm * tNow, L = span * 3;
+            // Scan line through the selected scanner, clipped to the view
+            var sx = sim.vm * tNow + off[0], sy = off[1], L = span * 3;
             ctx.strokeStyle = ptCol; ctx.globalAlpha = 0.55; ctx.lineWidth = 1.5;
             ctx.beginPath();
-            ctx.moveTo(X(sx - sim.d[0] * L), Y(-sim.d[1] * L));
-            ctx.lineTo(X(sx + sim.d[0] * L), Y(sim.d[1] * L));
+            ctx.moveTo(X(sx - sim.d[0] * L), Y(sy - sim.d[1] * L));
+            ctx.lineTo(X(sx + sim.d[0] * L), Y(sy + sim.d[1] * L));
             ctx.stroke(); ctx.globalAlpha = 1;
+            if (rec) rec.line = { anchor: [sx, sy], dir: [sim.d[0], sim.d[1]] };
         }
 
         // Mobile mapper (4.5 m x 1.8 m), pointing along +x
@@ -344,8 +382,19 @@
         ctx.moveTo(X(mx - 2.25), Y(0.9)); ctx.lineTo(X(mx + 1.6), Y(0.9)); ctx.lineTo(X(mx + 2.25), Y(0));
         ctx.lineTo(X(mx + 1.6), Y(-0.9)); ctx.lineTo(X(mx - 2.25), Y(-0.9)); ctx.closePath();
         ctx.fill(); ctx.stroke();
+        // Scanners at the body's rear corners: the other one as a small muted
+        // outline, the selected one filled in its colour (red left, blue right)
+        var rM = Math.max(2.5, scale * 0.2);
+        ctx.beginPath(); ctx.arc(X(mx + offO[0]), Y(offO[1]), rM * 0.7, 0, 2 * Math.PI);
+        ctx.strokeStyle = muted; ctx.lineWidth = 1.2; ctx.stroke();
         ctx.fillStyle = ptCol;
-        ctx.beginPath(); ctx.arc(X(mx + 1.2), Y(0), Math.max(2.5, scale * 0.25), 0, 2 * Math.PI); ctx.fill();
+        ctx.beginPath(); ctx.arc(X(mx + off[0]), Y(off[1]), rM, 0, 2 * Math.PI); ctx.fill();
+        if (rec) {
+            rec.markers = { sel: [mx + off[0], off[1]], other: [mx + offO[0], offO[1]], r: rM };
+            rec.mapper = [[mx - 2.25, 0.9], [mx + 1.6, 0.9], [mx + 2.25, 0], [mx + 1.6, -0.9], [mx - 2.25, -0.9]];
+            rec.tNow = tNow; rec.progress = progress;
+            window.mlsDrawRecord = rec;
+        }
 
         // Heading arrows
         arrow(18, H - 18, [1, 0], 'mapper', muted);
