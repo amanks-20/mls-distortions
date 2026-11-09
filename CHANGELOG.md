@@ -8,6 +8,7 @@
 - 3D: scan-plane vertical tilt follows the mounting figure (upper half leans towards the direction of motion).
 - Scanners are drawn at the mapper's rear-left and rear-right corners (2D and 3D), the non-selected one as a smaller solid marker in its own colour; the simulation is unchanged.
 - Explorer intro, φv hint, limitations note and descriptions, and the Learn closing sentence, now describe the 3D view and the field examples.
+- Field example F38 shows only the over-elongated car (points 0.5–3.5 m left of the mapper's path, 0.3–2 m above the road, in connected streaks), in a frame wide enough for both full streaks; `tools/render_field.py` gains the matching options.
 
 ## v1.1.0
 

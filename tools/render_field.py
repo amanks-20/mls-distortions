@@ -17,6 +17,17 @@ or by GPS time.
 
 Height filter defaults to 0.5-3.0 m above local ground (vehicles), so the road
 surface does not swamp the object.
+
+Showing only one vehicle (--lane): points are kept only if they lie in a band
+LO..HI m to the left of the mapper's path (negative = right), between --hmin and
+--hmax above the road, and in an 8-connected streak (0.25 m cells, along-track x
+by lateral offset) at least --min-streak m long. The road level is taken along
+the track from the mapper's own lane (5th percentile of height in 2 m bins,
+|offset| < 1 m). Everything else is left out of the image. F38 was made with
+
+    tools/.venv/bin/python tools/render_field.py --ids F38 --no-title --size 76 --shift -3.75 \
+        --lane 0.5 3.5 --hmin 0.3 --hmax 2.0 --min-streak 8 --dot 3.5 --out-dir static/images/field
+    (and the same with --theme dark)
 """
 import argparse
 import io
@@ -29,7 +40,8 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_DATA = os.path.expanduser("~/Documents/GitHub/Distortions/Data/Real/MLS Traffic Data")
-COLORS = {0: "#d93636", 1: "#2f5bd3"}          # explorer --left / --right (light theme)
+COLORS = {"light": {0: "#d93636", 1: "#2f5bd3"},   # explorer --left / --right, light theme
+          "dark": {0: "#ff6b6b", 1: "#6e9bff"}}    # and dark theme
 LABELS = {0: "left scanner", 1: "right scanner"}
 
 
@@ -73,7 +85,8 @@ def crop(scanners, cx, cy, half, hmin, hmax):
     return out
 
 
-def render(scanners, traj, cx, cy, t, size, color, title, path, fmt, max_kb, hmin, hmax, stride, theme):
+def render(scanners, traj, cx, cy, t, size, color, title, path, fmt, max_kb, hmin, hmax, stride, theme,
+           lane=None, min_streak=8.0, dot=1.6):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -109,10 +122,18 @@ def render(scanners, traj, cx, cy, t, size, color, title, path, fmt, max_kb, hmi
     cmap = plt.get_cmap("viridis")
     tmin = min((p[3].min() for p in crop_cache(scanners, cx, cy, half, hmin, hmax) if len(p[3])), default=t)
     tmax = max((p[3].max() for p in crop_cache(scanners, cx, cy, half, hmin, hmax) if len(p[3])), default=t + 1)
-    for k, x, y, tt in crop_cache(scanners, cx, cy, half, hmin, hmax):
+    if lane is None:
+        layers = crop_cache(scanners, cx, cy, half, hmin, hmax)
+    else:
+        layers, stats = segment_streaks(scanners, traj, cx, cy, half, t, lane, hmin, hmax, min_streak, fwd, left)
+        for k, st in stats.items():
+            span = f" (x {st['x_from']:+.1f}..{st['x_to']:+.1f} m)" if st["streak"] else ""
+            print(f"  scanner {k}: {st['frame']} points in the frame, {st['lane']} in the lane band, {st['height']} in the height window,"
+                  f" {st['streak']} in streaks >= {min_streak:g} m{span}")
+    for k, x, y, tt in layers:
         lx, ly = to_local(x[::stride], y[::stride])
-        c = COLORS[k] if color == "scanner" else cmap((tt[::stride] - tmin) / max(tmax - tmin, 1e-6))
-        ax.scatter(lx, ly, s=1.6, c=c, lw=0, alpha=0.85, zorder=2, label=LABELS[k] if color == "scanner" else None)
+        c = COLORS[theme][k] if color == "scanner" else cmap((tt[::stride] - tmin) / max(tmax - tmin, 1e-6))
+        ax.scatter(lx, ly, s=dot, c=c, lw=0, alpha=0.85, zorder=2, label=LABELS[k] if color == "scanner" else None)
 
     ax.set_xlim(-hx, hx); ax.set_ylim(-hy, hy); ax.set_aspect("equal"); ax.axis("off")
     # scale bar
@@ -132,7 +153,7 @@ def render(scanners, traj, cx, cy, t, size, color, title, path, fmt, max_kb, hmi
     if title:
         ax.text(-hx + 0.02 * size, hy - 0.03 * size, title, color=fg, va="top", fontsize=8)
     if color == "scanner":
-        ax.legend(loc="upper center", fontsize=7, frameon=True, facecolor=bg, edgecolor="none", framealpha=0.9, labelcolor=fg, markerscale=5, ncol=2)
+        ax.legend(loc="upper center", fontsize=7, frameon=True, facecolor=bg, edgecolor="none", framealpha=0.9, labelcolor=fg, markerscale=5 * math.sqrt(1.6 / dot), ncol=2)
 
     buf = io.BytesIO(); fig.savefig(buf, format="png", facecolor=bg); plt.close(fig)
     im = Image.open(io.BytesIO(buf.getvalue())).convert("RGB")
@@ -145,6 +166,45 @@ def render(scanners, traj, cx, cy, t, size, color, title, path, fmt, max_kb, hmi
         if os.path.getsize(path) <= max_kb * 1024:
             break
     return os.path.getsize(path)
+
+
+def segment_streaks(scanners, traj, cx, cy, half, t, lane, hmin, hmax, min_len, fwd, left):
+    """Points of one vehicle: lane band, height window above the road, long connected streaks.
+
+    Returns [(scanner, x, y, t)] and per-scanner counts for each stage."""
+    from scipy import ndimage
+    sel = np.abs(traj["T"] - t) < 30
+    px = (traj["X"][sel] - cx) * fwd[0] + (traj["Y"][sel] - cy) * fwd[1]
+    py = (traj["X"][sel] - cx) * left[0] + (traj["Y"][sel] - cy) * left[1]
+    o = np.argsort(px); px, py = px[o], py[o]
+    hy = half / 1.6
+    out, stats = [], {}
+    for k, s in enumerate(scanners):
+        m = (np.abs(s["x"] - cx) < half * 1.5) & (np.abs(s["y"] - cy) < half * 1.5)
+        x, y, z, tt = s["x"][m], s["y"][m], s["z"][m], s["t"][m]
+        lx = (x - cx) * fwd[0] + (y - cy) * fwd[1]; ly = (x - cx) * left[0] + (y - cy) * left[1]
+        inf = (np.abs(lx) < half) & (np.abs(ly) < hy)
+        off = ly - np.interp(lx, px, py)                          # lateral offset from the mapper's path, + = left
+        own = inf & (np.abs(off) < 1.0)                           # the mapper's own lane: road surface
+        bins = np.arange(-half, half + 2, 2.0); idx = np.digitize(lx, bins)
+        road = np.array([np.percentile(z[own & (idx == i)], 5) if (own & (idx == i)).sum() > 20 else np.nan
+                         for i in range(len(bins) + 1)])
+        ok = ~np.isnan(road); bc = np.r_[bins[0] - 1, (bins[:-1] + bins[1:]) / 2, bins[-1] + 1]
+        hz = z - np.interp(lx, bc[ok], road[ok])
+        a = inf & (off > lane[0]) & (off < lane[1])
+        b = a & (hz > hmin) & (hz < hmax)
+        keep = np.zeros(len(x), bool)
+        if b.any():
+            gx = np.floor((lx[b] + half) / 0.25).astype(int); gy = np.floor((off[b] - lane[0]) / 0.25).astype(int)
+            grid = np.zeros((gx.max() + 2, gy.max() + 2), bool); grid[gx, gy] = True
+            lab, n = ndimage.label(grid, structure=np.ones((3, 3)))
+            pl = lab[gx, gy]
+            good = [c for c in range(1, n + 1) if np.ptp(lx[b][pl == c]) >= min_len]
+            keep[np.nonzero(b)[0][np.isin(pl, good)]] = True
+        stats[k] = dict(frame=int(inf.sum()), lane=int(a.sum()), height=int(b.sum()), streak=int(keep.sum()),
+                        x_from=float(lx[keep].min()) if keep.any() else None, x_to=float(lx[keep].max()) if keep.any() else None)
+        out.append((k, x[keep], y[keep], tt[keep]))
+    return out, stats
 
 
 _cache = {}
@@ -174,6 +234,11 @@ def main():
     ap.add_argument("--theme", choices=["light", "dark"], default="light")
     ap.add_argument("--out-dir", default=os.path.join(HERE, "out", "preview"))
     ap.add_argument("--no-title", action="store_true", help="omit the text label inside the image")
+    ap.add_argument("--shift", type=float, default=0.0, help="move the crop centre this many metres along the mapper's heading")
+    ap.add_argument("--lane", nargs=2, type=float, metavar=("LO", "HI"),
+                    help="show only one vehicle: points LO..HI m left of the mapper's path (see the module docstring)")
+    ap.add_argument("--min-streak", type=float, default=8.0, help="with --lane: minimum length (m) of a connected streak")
+    ap.add_argument("--dot", type=float, default=1.6, help="point size (matplotlib s)")
     a = ap.parse_args()
 
     jobs = []
@@ -193,11 +258,15 @@ def main():
 
     scanners, traj = load_scanners(a.data), load_traj(a.data)
     for cx, cy, t, size, name, title in jobs:
+        if a.shift:
+            _, _, crs = mapper_at(traj, t)
+            cx, cy = cx + a.shift * math.sin(crs), cy + a.shift * math.cos(crs)
         if a.no_title:
             title = ""
         suffix = "-dark" if a.theme == "dark" else ""
         path = os.path.join(a.out_dir, f"{name}{suffix}.{a.format}")
-        n = render(scanners, traj, cx, cy, t, size, a.color, title, path, a.format, a.max_kb, a.hmin, a.hmax, a.stride, a.theme)
+        n = render(scanners, traj, cx, cy, t, size, a.color, title, path, a.format, a.max_kb, a.hmin, a.hmax, a.stride, a.theme,
+                   lane=a.lane, min_streak=a.min_streak, dot=a.dot)
         print(f"{path}  {n / 1024:.0f} KB")
 
 
