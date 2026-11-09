@@ -7,7 +7,7 @@
 - 3D: draw the selected scanner's scan plane, with an on/off toggle.
 - 3D: scan-plane vertical tilt follows the mounting figure (upper half leans towards the direction of motion).
 - Scanners are drawn at the mapper's rear-left and rear-right corners (2D and 3D), the non-selected one as a smaller solid marker in its own colour; the simulation is unchanged.
-- Explorer intro, φv hint, limitations note and descriptions now describe the 3D view and the field examples.
+- Explorer intro, φv hint, limitations note and descriptions, and the Learn closing sentence, now describe the 3D view and the field examples.
 
 ## v1.1.0
 
