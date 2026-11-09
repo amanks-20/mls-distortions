@@ -480,6 +480,11 @@ details.more summary { cursor: pointer; color: var(--link); font-size: 15px; }
 .legend .l-pts { background: var(--right); height: 4px; vertical-align: 2px; }
 .legend .l-pts.left { background: var(--left); }
 .legend .l-map { background: var(--mapper); }
+.legend span[hidden] { display: none; }
+.legend .l-plane {
+    background: linear-gradient(90deg, color-mix(in srgb, var(--left) 30%, transparent) 50%, color-mix(in srgb, var(--right) 30%, transparent) 50%);
+    border: 1px solid color-mix(in srgb, var(--muted) 60%, transparent);
+}
 .legend .l-line { height: 2px; background: currentColor; vertical-align: 3px; opacity: 0.6; }
 
 .regime {

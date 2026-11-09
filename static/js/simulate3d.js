@@ -1,6 +1,9 @@
 /* ==========================================================================
    3D scan of the moving box (computation only, nothing is drawn).
    window.mlsSimulate3D(state[, opts]) -> { pts: [{x, y, z, t, i, face}], ... }
+   window.mlsScanPlane(state, side, t[, opts]) -> { origin, normal }: the scan
+   plane of the 'L' or 'R' scanner at time t (s). The sampler uses the same
+   function, so a drawn plane is exactly the plane the points were sampled on.
 
    Same state object, motion model and sampling rules as simulate() in
    explorer.js (which is not modified):
@@ -37,8 +40,23 @@
     function sub3(a, b) { return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]; }
     function cross3(a, b) { return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]; }
 
+    function scannerHeight(opts) {
+        return opts && typeof opts.hScanner === 'number' ? opts.hScanner : H_SCANNER;
+    }
+
+    // Scan plane at time t: origin = scanner position (vm·t, 0, H), unit
+    // normal N = (cos φh cos φv, ±sin φh cos φv, sin φv), + right, − left.
+    function scanPlane(s, side, t, opts) {
+        var vm = s.vm * (1 / 3.6), ph = s.phiH * D2R, pv = s.phiV * D2R;
+        var sg = side === 'R' ? 1 : -1;
+        return {
+            origin: [vm * t, 0, scannerHeight(opts)],
+            normal: [Math.cos(ph) * Math.cos(pv), sg * Math.sin(ph) * Math.cos(pv), Math.sin(pv)]
+        };
+    }
+
     function simulate3D(s, opts) {
-        var H = opts && typeof opts.hScanner === 'number' ? opts.hScanner : H_SCANNER;
+        var H = scannerHeight(opts);
         var kmh = 1 / 3.6;
         var vm = s.vm * kmh, vo = s.vo * kmh;
         var th = s.theta * D2R, ph = s.phiH * D2R, pv = s.phiV * D2R;
@@ -47,7 +65,7 @@
         var u = [Math.cos(th), Math.sin(th), 0];                 // object heading
         var w = [-u[1], u[0], 0];                                 // object left
         var z = [0, 0, 1];
-        var N = [Math.cos(ph) * Math.cos(pv), sg * Math.sin(ph) * Math.cos(pv), Math.sin(pv)];
+        var N = scanPlane(s, s.side, 0, opts).normal;
 
         // Start position: identical to simulate() (object centred on the
         // explorer's 2D scan line, 7 m to the side)
@@ -117,7 +135,7 @@
         var pts = [];
         for (var i = 0; i <= nProf; i++) {
             var t = t0 + (t1 - t0) * i / nProf;
-            var S = [vm * t, 0, H];
+            var S = scanPlane(s, s.side, t, opts).origin;
             var C = [c0[0] + vo * t * u[0], c0[1] + vo * t * u[1], 0];   // box ground-centre at t
             var P = corners.map(function (o) { return [C[0] + o[0], C[1] + o[1], o[2]]; });
             var dist = P.map(function (x) { return dot3(N, sub3(x, S)); });
@@ -179,4 +197,5 @@
     }
 
     window.mlsSimulate3D = simulate3D;
+    window.mlsScanPlane = scanPlane;
 })();

@@ -14,7 +14,7 @@
 
     var root = document.getElementById('explorer');
     var canvas = root && root.querySelector('canvas');
-    if (!root || !canvas || !window.mlsSimulate3D) return;
+    if (!root || !canvas || !window.mlsSimulate3D || !window.mlsScanPlane) return;
 
     var D2R = Math.PI / 180;
     var DEFAULT = { yaw: -60, pitch: 30, zoom: 1 };     // about 30° elevation
@@ -25,14 +25,20 @@
     var MAX_POINTS = 6000;
     var FACE_SHADE = { top: 1.0, side: 0.82, front: 0.68, back: 0.56 };
     var MAPPER = { len: 4.5, wid: 1.8 };               // same footprint as the 2D drawing
+    // Scan-plane patches: fill alpha of the selected / other scanner's plane,
+    // and how far (m) the clip box reaches above the scanner
+    var PLANE_ALPHA = { on: 0.25, off: 0.08 }, PLANE_TOP = 0.5;
 
     var mode = '2d';
+    var showPlanes = true;
     var cam = { yaw: DEFAULT.yaw, pitch: DEFAULT.pitch, zoom: DEFAULT.zoom };
     var simCache = { key: null, sim: null, spacing: null };
     var maskCache = null;
 
     var viewBtns = root.querySelectorAll('[data-view]');
     var resetBtn = root.querySelector('#ex-3d-reset');
+    var planesBtn = root.querySelector('#ex-3d-planes');
+    var legendPlanes = root.querySelector('#ex-legend-planes');
     var notes = root.querySelector('#ex-3d-notes');
     var noteTop = root.querySelector('#ex-3d-notop');
     var noteH = root.querySelector('#ex-3d-hs');
@@ -148,6 +154,46 @@
         });
         return out.concat(out.map(function (p) { return [p[0], p[1], H]; }));
     }
+    // Plane (origin o, normal n) clipped to the axis-aligned box [lo, hi]:
+    // the convex polygon of its crossings with the 12 box edges, in order.
+    function clipPlane(o, n, lo, hi) {
+        var c = [];
+        for (var k = 0; k < 8; k++) c.push([k & 1 ? hi[0] : lo[0], k & 2 ? hi[1] : lo[1], k & 4 ? hi[2] : lo[2]]);
+        var d = c.map(function (p) { return n[0] * (p[0] - o[0]) + n[1] * (p[1] - o[1]) + n[2] * (p[2] - o[2]); });
+        var V = [];
+        [[0, 1], [2, 3], [4, 5], [6, 7], [0, 2], [1, 3], [4, 6], [5, 7], [0, 4], [1, 5], [2, 6], [3, 7]].forEach(function (e) {
+            var a = d[e[0]], b = d[e[1]];
+            if ((a > 0 && b > 0) || (a < 0 && b < 0) || a === b) return;
+            var f = a / (a - b), A = c[e[0]], B = c[e[1]];
+            V.push([A[0] + f * (B[0] - A[0]), A[1] + f * (B[1] - A[1]), A[2] + f * (B[2] - A[2])]);
+        });
+        if (V.length < 3) return [];
+        var m = [0, 0, 0];
+        V.forEach(function (p) { m[0] += p[0] / V.length; m[1] += p[1] / V.length; m[2] += p[2] / V.length; });
+        var e1 = Math.abs(n[2]) < 0.9 ? [-n[1], n[0], 0] : [1, 0, 0];
+        var e2 = [n[1] * e1[2] - n[2] * e1[1], n[2] * e1[0] - n[0] * e1[2], n[0] * e1[1] - n[1] * e1[0]];
+        function ang(p) {
+            var q = [p[0] - m[0], p[1] - m[1], p[2] - m[2]];
+            return Math.atan2(q[0] * e2[0] + q[1] * e2[1] + q[2] * e2[2], q[0] * e1[0] + q[1] * e1[1] + q[2] * e1[2]);
+        }
+        return V.sort(function (p, q) { return ang(p) - ang(q); });
+    }
+
+    // Keep the part of a convex polygon where d·(p − T) ≤ lim (Sutherland–Hodgman, one edge)
+    function clipHalf(poly, d, T, lim) {
+        var out = [];
+        function f(p) { return (p[0] - T[0]) * d[0] + (p[1] - T[1]) * d[1] + (p[2] - T[2]) * d[2] - lim; }
+        for (var k = 0; k < poly.length; k++) {
+            var A = poly[k], B = poly[(k + 1) % poly.length], fa = f(A), fb = f(B);
+            if (fa <= 0) out.push(A);
+            if ((fa < 0 && fb > 0) || (fa > 0 && fb < 0)) {
+                var g = fa / (fa - fb);
+                out.push([A[0] + g * (B[0] - A[0]), A[1] + g * (B[1] - A[1]), A[2] + g * (B[2] - A[2])]);
+            }
+        }
+        return out;
+    }
+
     var BOX_EDGES = [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]];
 
     function draw(cv, ctx, state, progress, targetPx) {
@@ -209,6 +255,36 @@
         for (var gy = gy0; gy <= gy1 + 1e-9; gy += step) seg([gx0, gy, 0], [gx1, gy, 0]);
         ctx.stroke(); ctx.globalAlpha = 1;
 
+        // Scan planes of both scanners through the scanner at tNow, clipped to
+        // the scene's bounding box (box over the scan, mapper, cloud) from the
+        // ground to just above the scanner, and drawn under everything else.
+        // The other scanner's plane goes first.
+        if (showPlanes) {
+            var clo = [lo[0], lo[1], 0];
+            var chi = [hi[0], hi[1], Math.max(hi[2], sim.hScanner) + PLANE_TOP];
+            var other = state.side === 'R' ? 'L' : 'R';
+            [other, state.side].forEach(function (sd) {
+                var pl = window.mlsScanPlane(state, sd, tNow, { hScanner: sim.hScanner });
+                var poly = clipPlane(pl.origin, pl.normal, clo, chi);
+                // ...and to the window the fit frames from the default camera, so the
+                // patch stays inside the scene's framing (steady while rotating)
+                [[B0.r, mxp], [B0.u, myp]].forEach(function (c) {
+                    poly = clipHalf(poly, c[0], T, c[1]);
+                    poly = clipHalf(poly, [-c[0][0], -c[0][1], -c[0][2]], T, c[1]);
+                });
+                if (poly.length < 3) return;
+                var on = sd === state.side;
+                ctx.beginPath();
+                poly.forEach(function (v, k) { var p = P(v[0], v[1], v[2]); if (k) ctx.lineTo(p[0], p[1]); else ctx.moveTo(p[0], p[1]); });
+                ctx.closePath();
+                ctx.fillStyle = sd === 'R' ? css('--right') : css('--left');
+                ctx.globalAlpha = on ? PLANE_ALPHA.on : PLANE_ALPHA.off; ctx.fill();
+                ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = 1;
+                ctx.globalAlpha = on ? 0.7 : 0.3; ctx.stroke();
+                ctx.globalAlpha = 1;
+            });
+        }
+
         function wire(c, stroke, dash, width) {
             ctx.beginPath();
             BOX_EDGES.forEach(function (e) { seg(c[e[0]], c[e[1]]); });
@@ -228,6 +304,13 @@
         ctx.beginPath(); seg([mx, 0, 0], [mx, 0, sim.hScanner]); ctx.strokeStyle = muted; ctx.lineWidth = 1.5; ctx.stroke();
         var sp = P(mx, 0, sim.hScanner);
         ctx.beginPath(); ctx.arc(sp[0], sp[1], 3.5, 0, 2 * Math.PI); ctx.fillStyle = shade(ptBase, 1); ctx.fill();
+        if (showPlanes) {
+            // scanner marker where the planes meet: an outlined diamond (paths, not arcs,
+            // so tests/perf3d.py's dot count stays "arcs minus the scanner dot")
+            ctx.beginPath();
+            ctx.moveTo(sp[0], sp[1] - 7); ctx.lineTo(sp[0] + 7, sp[1]); ctx.lineTo(sp[0], sp[1] + 7); ctx.lineTo(sp[0] - 7, sp[1]);
+            ctx.closePath(); ctx.strokeStyle = text; ctx.lineWidth = 1.2; ctx.stroke();
+        }
 
         // Points captured so far: thinned, depth-sorted (far first), shaded by face
         var mask = displayMask(sim, scale, targetPx);
@@ -268,7 +351,7 @@
         var hasTop = sim.pts.some(function (p) { return p.face === 'top'; });
         if (noteTop) noteTop.hidden = hasTop;
         if (noteH) {
-            var t = 'Scanner height ' + sim.hScanner + ' m (illustrative, not from the thesis). It shifts where the plane cuts the box but not its length or order.';
+            var t = 'Scanner height ' + sim.hScanner + ' m (illustrative, not from the thesis). It shifts where the plane cuts the box but not its length or order. Scan planes are drawn as finite patches; the real planes extend further.';
             if (noteH.textContent !== t) noteH.textContent = t;
         }
     }
@@ -279,6 +362,8 @@
         var on = m === '3d';
         viewBtns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.view === m)); });
         if (resetBtn) resetBtn.hidden = !on;
+        if (planesBtn) planesBtn.hidden = !on;
+        if (legendPlanes) legendPlanes.hidden = !(on && showPlanes);
         if (notes) notes.hidden = !on;
         if (legendLine) legendLine.hidden = on;
         box.classList.toggle('is-3d', on);
@@ -301,6 +386,12 @@
     }
     function resetView() { cam.yaw = DEFAULT.yaw; cam.pitch = DEFAULT.pitch; cam.zoom = DEFAULT.zoom; redrawSoon(); }
     if (resetBtn) resetBtn.addEventListener('click', resetView);
+    if (planesBtn) planesBtn.addEventListener('click', function () {
+        showPlanes = !showPlanes;
+        planesBtn.setAttribute('aria-pressed', String(showPlanes));
+        if (legendPlanes) legendPlanes.hidden = !(mode === '3d' && showPlanes);
+        redrawSoon();
+    });
 
     function rotate(dYaw, dPitch) {
         cam.yaw = ((cam.yaw + dYaw) % 360 + 360) % 360;

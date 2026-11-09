@@ -8,7 +8,9 @@
 (c) a static object (vo = 0) gives an undistorted 4 m x 2 m top face
 (d) (a) repeated for scanner heights 1.8, 2.0, 2.5 m: results must not depend on it
 plus a sanity check that every point lies on the scan plane, on the box surface,
-and on a face the scanner can see.
+and on a face the scanner can see, and (e) that every point lies on the plane
+window.mlsScanPlane(state, side, t) returns, the helper the 3D view draws.
+(e) proves the drawn scan plane is the sampling plane (tolerance TOL_PLANE).
 
 Lengths are compared, not absolute positions or times (the scanner height
 shifts those). Tolerance: TOL_LEN metres (two profile steps of 0.05 m).
@@ -50,6 +52,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 JSC = "/System/Library/Frameworks/JavaScriptCore.framework/Versions/Current/Helpers/jsc"
 TOL_LEN = 0.10      # m
 TOL_GEOM = 1e-6     # m, point-on-plane / point-on-surface
+TOL_PLANE = 1e-9    # m, point vs the drawn plane (mlsScanPlane), test (e)
 
 
 def run():
@@ -273,13 +276,21 @@ def main():
         print(f"{s['id']:7} plane {s['worstPlane']:.1e}  surface {s['worstSurf']:.1e}  hidden {s['hidden']}  [{faces}]"
               + ("" if ok else "   <-- FAILS"))
 
+    print(f"\n(e) Points on the drawn plane mlsScanPlane(state, side, t): max |(p - origin(t)) . normal|, tolerance {TOL_PLANE:.0e} m")
+    print(f"{'case':7} {'phiV':>5} {'H m':>5} {'points':>7} {'worst':>9}")
+    for c in r["plane"]:
+        ok = c["n"] > 0 and c["worst"] <= TOL_PLANE
+        if not ok:
+            fails.append(f"(e) {c['id']} phiV={c['phiV']} H={c['h']}: {c['n']} points, worst {c['worst']:.2e}")
+        print(f"{c['id']:7} {c['phiV']:5d} {c['h']:5.1f} {c['n']:7d} {c['worst']:9.1e}" + ("" if ok else "   <-- FAILS"))
+
     print()
     if fails:
         print(f"FAIL: {len(fails)} check(s) differ")
         for x in fails:
             print("  " + x)
         return 1
-    print("PASS: all 3D checks agree (a, b, b2, b3, c, d, sanity)")
+    print("PASS: all 3D checks agree (a, b, b2, b3, c, d, sanity, e)")
     return 0
 
 

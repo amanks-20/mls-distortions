@@ -4,6 +4,7 @@
 
 - Reset view button is hidden in the 2D view and shown only in 3D.
 - Below 1340 px, the field panel now comes after the readouts (canvas, readouts, field panel).
+- 3D view draws the scan planes of both scanners (selected one stronger) as translucent patches through the scanner, moving with the scan; "Scan planes" toggle, on by default. The plane comes from the sampler's own function (`window.mlsScanPlane`), and `tests/check3d.py` (e) checks every point lies on it.
 
 ## v1.1.0
 

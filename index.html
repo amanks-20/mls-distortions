@@ -272,7 +272,7 @@
                             <div class="canvas-col">
                                 <div class="canvas-box">
                                     <canvas aria-label="Top-view simulation of the scan" role="img"></canvas>
-                                    <div class="canvas-tools"><button type="button" class="pill" id="ex-3d-reset" hidden>Reset view</button> <button type="button" class="pill" id="ex-play">Play scan</button></div>
+                                    <div class="canvas-tools"><button type="button" class="pill" id="ex-3d-planes" aria-pressed="true" hidden>Scan planes</button> <button type="button" class="pill" id="ex-3d-reset" hidden>Reset view</button> <button type="button" class="pill" id="ex-play">Play scan</button></div>
                                 </div>
                                 <div class="ex3d-notes" id="ex-3d-notes" hidden>
                                     <p class="ex3d-warn" id="ex-3d-notop" role="status" hidden>The scan plane misses the top face at this angle.</p>
@@ -285,6 +285,7 @@
                                     <span><i class="l-pts" id="ex-pts-swatch"></i>recorded points</span>
                                     <span><i class="l-line"></i>scan line</span>
                                     <span><i class="l-map"></i>mobile mapper</span>
+                                    <span id="ex-legend-planes" hidden><i class="l-plane"></i>scan planes (left red, right blue; selected stronger)</span>
                                 </div>
                             </div>
 

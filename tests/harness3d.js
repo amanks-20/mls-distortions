@@ -33,7 +33,7 @@
     }
     load('static/js/explorer.js');
     load('static/js/simulate3d.js');
-    var sim2 = G.mlsSimulate, sim3 = G.mlsSimulate3D;
+    var sim2 = G.mlsSimulate, sim3 = G.mlsSimulate3D, plane = G.mlsScanPlane;
 
     var PRESETS = {
         A1: { vm: 40, vo: 20, theta: 0 }, A3: { vm: 40, vo: 100, theta: 0 }, A2: { vm: 40, vo: 40, theta: 0 },
@@ -91,7 +91,17 @@
         return s;
     }
 
-    var out = { a: [], b: [], c: [], d: [], sanity: [] };
+    // Every point against mlsScanPlane (the helper view3d.js draws): |(p - origin(t)) . normal|
+    function onDrawnPlane(s, r, opts) {
+        var worst = 0;
+        r.pts.forEach(function (p) {
+            var pl = plane(s, s.side, p.t, opts), o = pl.origin, n = pl.normal;
+            worst = Math.max(worst, Math.abs((p.x - o[0]) * n[0] + (p.y - o[1]) * n[1] + (p.z - o[2]) * n[2]));
+        });
+        return worst;
+    }
+
+    var out = { a: [], b: [], c: [], d: [], sanity: [], plane: [] };
     Object.keys(PRESETS).forEach(function (id) {
         ['L', 'R'].forEach(function (side) {
             var s = state(id, side);
@@ -111,6 +121,12 @@
             [1.8, 2.0, 2.5].forEach(function (h) {
                 var m = topMetrics(sim3(s, { hScanner: h }));
                 out.d.push({ id: id + '-' + side, h: h, ls3: m.lsEdge, inv3: m.inverted });
+            });
+
+            [[0, undefined], [30, undefined], [60, undefined], [30, 1.8]].forEach(function (c) {
+                var st2 = state(id, side, { phiV: c[0] }), opts = c[1] ? { hScanner: c[1] } : undefined;
+                var r = sim3(st2, opts);
+                out.plane.push({ id: id + '-' + side, phiV: c[0], h: r.hScanner, n: r.pts.length, worst: onDrawnPlane(st2, r, opts) });
             });
         });
     });
