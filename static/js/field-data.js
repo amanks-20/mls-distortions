@@ -66,7 +66,7 @@
             imageDark: 'static/images/field/F36-dark.webp',
             width: 960, height: 600,
             alt: 'Top view of real mobile laser scanning data. An oncoming vehicle to the right of the mapper appears twice, side by side: the left scanner’s copy (red) is sheared into a parallelogram and the right scanner’s copy (blue) has a different shape. Scale bar 1 m.',
-            caption: 'Contraction in the field. An oncoming vehicle to the right of the mapper met the scan lines head-on, so each scanner swept it quickly and recorded a shortened, sheared copy at a different place. Estimated speeds: mapper 38 km/h, vehicle 30 ± 14 km/h, oncoming (θ ≈ 175°). Red: left scanner; blue: right scanner.',
+            caption: 'Contraction in the field. An oncoming vehicle to the right of the mapper met the scan lines head-on, so each scanner swept it quickly and recorded a shortened, sheared copy at a different place. The simulator always places the object on the mapper’s left; in this real example the oncoming vehicle is on the mapper’s right. Estimated speeds: mapper 38 km/h, vehicle 30 ± 14 km/h, oncoming (θ ≈ 175°). Red: left scanner; blue: right scanner.',
             vm: { kmh: 38 },
             vo: { kmh: 30, pm: 14 },
             theta: -175,
