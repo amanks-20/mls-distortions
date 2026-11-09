@@ -228,6 +228,14 @@
         ext.forEach(function (p) { for (var a = 0; a < 3; a++) { lo[a] = Math.min(lo[a], p[a]); hi[a] = Math.max(hi[a], p[a]); } });
         var T = sim.pts.length ? [(cloud[0] + cloud[3]) / 2, (cloud[1] + cloud[4]) / 2, (cloud[2] + cloud[5]) / 2]
                                : [(lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2, (lo[2] + hi[2]) / 2];
+        // Display translation by the selected scanner's mounting offset
+        // (window.mlsScannerMount, explorer.js): everything but the mapper body
+        // moves with it. The fit below is computed as before and the camera
+        // target T moves with the scene.
+        var MNT = window.mlsScannerMount || { L: [0, 0], R: [0, 0] };
+        var o2 = MNT[state.side], oO = MNT[state.side === 'R' ? 'L' : 'R'];
+        var off = [o2[0], o2[1], 0];
+        function D(p) { return [p[0] + off[0], p[1] + off[1], p[2] + off[2]]; }
         // Fit: scene seen from the DEFAULT camera, centred on the cloud. Using
         // the default (not the current) camera keeps the scale steady while rotating.
         var B0 = basis(DEFAULT.yaw, DEFAULT.pitch), mxp = 1e-6, myp = 1e-6;
@@ -236,8 +244,34 @@
             mxp = Math.max(mxp, Math.abs(dx * B0.r[0] + dy * B0.r[1] + dz * B0.r[2]));
             myp = Math.max(myp, Math.abs(dx * B0.u[0] + dy * B0.u[1] + dz * B0.u[2]));
         });
+        // Relative to the scene the mapper body sits at -offset. Only if its
+        // footprint there (over the scan, up to the scanner height) would leave
+        // the fitted window is the window panned by the overflow, and only if it
+        // cannot fit at this scale is the view widened (seen from the default
+        // camera, like the fit). Otherwise the scene is framed exactly as before.
+        var cR = [Infinity, -Infinity], cU = [Infinity, -Infinity], bR = [Infinity, -Infinity], bU = [Infinity, -Infinity];
+        function pr(p, R, U) {
+            var dx = p[0] - T[0], dy = p[1] - T[1], dz = p[2] - T[2];
+            var r = dx * B0.r[0] + dy * B0.r[1] + dz * B0.r[2], u = dx * B0.u[0] + dy * B0.u[1] + dz * B0.u[2];
+            R[0] = Math.min(R[0], r); R[1] = Math.max(R[1], r); U[0] = Math.min(U[0], u); U[1] = Math.max(U[1], u);
+        }
+        ext.forEach(function (p) { pr(p, cR, cU); });
+        [sim.t0, sim.t1].forEach(function (t) {     // the same two corners the fit's extent uses, shifted
+            pr([sim.vm * t - MAPPER.len / 2 - off[0], -MAPPER.wid / 2 - off[1], 0], bR, bU);
+            pr([sim.vm * t + MAPPER.len / 2 - off[0], MAPPER.wid / 2 - off[1], sim.hScanner], bR, bU);
+        });
+        function fitAxis(half, c, b) {        // window [-half, half] around T must hold c and b
+            var lo = Math.min(c[0], b[0]), hi = Math.max(c[1], b[1]);
+            if (lo >= -half && hi <= half) return { d: 0, half: half };
+            if (hi - lo <= 2 * half) return { d: Math.min(Math.max(0, hi - half), lo + half), half: half };
+            return { d: (lo + hi) / 2, half: (hi - lo) / 2 };
+        }
+        var fR = fitAxis(mxp, cR, bR), fU = fitAxis(myp, cU, bU);
+        if (fR.d || fU.d) T = [T[0] + fR.d * B0.r[0] + fU.d * B0.u[0], T[1] + fR.d * B0.r[1] + fU.d * B0.u[1], T[2] + fR.d * B0.r[2] + fU.d * B0.u[2]];
+        mxp = fR.half; myp = fU.half;
         var scale = Math.min((W / 2 - 24) / mxp, (H / 2 - 28) / myp) * cam.zoom;
 
+        T = D(T);
         var B = basis(cam.yaw, cam.pitch);
         function P(x, y, z) {
             var dx = x - T[0], dy = y - T[1], dz = z - T[2];
@@ -253,20 +287,22 @@
         var gx0 = Math.floor((lo[0] - 2) / step) * step, gx1 = Math.ceil((hi[0] + 2) / step) * step;
         var gy0 = Math.floor((lo[1] - 2) / step) * step, gy1 = Math.ceil((hi[1] + 2) / step) * step;
         ctx.strokeStyle = line; ctx.globalAlpha = 0.45; ctx.lineWidth = 1; ctx.beginPath();
-        for (var gx = gx0; gx <= gx1 + 1e-9; gx += step) seg([gx, gy0, 0], [gx, gy1, 0]);
-        for (var gy = gy0; gy <= gy1 + 1e-9; gy += step) seg([gx0, gy, 0], [gx1, gy, 0]);
+        for (var gx = gx0; gx <= gx1 + 1e-9; gx += step) seg(D([gx, gy0, 0]), D([gx, gy1, 0]));
+        for (var gy = gy0; gy <= gy1 + 1e-9; gy += step) seg(D([gx0, gy, 0]), D([gx1, gy, 0]));
         ctx.stroke(); ctx.globalAlpha = 1;
 
         // Scan plane of the selected scanner through the scanner at tNow, clipped
         // to the scene's bounding box (box over the scan, mapper, cloud) from the
         // ground to just above the scanner, and drawn under everything else.
         drawn.planes = [];
+        var rec = window.mlsRecordDraw ? { view: '3d', off: off, offOther: [oO[0], oO[1], 0], T: T, scale: scale, W: W, H: H, pts: [], boxes: {} } : null;
         if (showPlane) {
-            var clo = [lo[0], lo[1], 0];
-            var chi = [hi[0], hi[1], Math.max(hi[2], sim.hScanner) + PLANE_TOP];
+            var clo = D([lo[0], lo[1], 0]);
+            var chi = D([hi[0], hi[1], Math.max(hi[2], sim.hScanner) + PLANE_TOP]);
             [state.side].forEach(function (sd) {
                 var pl = window.mlsScanPlane(state, sd, tNow, { hScanner: sim.hScanner });
-                var poly = clipPlane(pl.origin, pl.normal, clo, chi);
+                var org = D(pl.origin);
+                var poly = clipPlane(org, pl.normal, clo, chi);
                 // ...and to the window the fit frames from the default camera, so the
                 // patch stays inside the scene's framing (steady while rotating)
                 [[B0.r, mxp], [B0.u, myp]].forEach(function (c) {
@@ -283,6 +319,7 @@
                 ctx.globalAlpha = 0.7; ctx.stroke();
                 ctx.globalAlpha = 1;
                 drawn.planes.push(sd);
+                if (rec) rec.plane = { origin: org, normal: pl.normal, poly: poly };
             });
         }
 
@@ -292,8 +329,10 @@
             ctx.setLineDash(dash || []); ctx.strokeStyle = stroke; ctx.lineWidth = width || 1.5; ctx.stroke(); ctx.setLineDash([]);
         }
         // True box at first and last contact (dashed, muted)
-        wire(first, muted, [5, 4]);
-        wire(last, muted, [5, 4]);
+        var firstD = first.map(D), lastD = last.map(D);
+        wire(firstD, muted, [5, 4]);
+        wire(lastD, muted, [5, 4]);
+        if (rec) { rec.boxes.first = firstD; rec.boxes.last = lastD; }
 
         // Mapper footprint on the ground and the scanner on its mast
         var mx = sim.vm * tNow, Lm = MAPPER.len / 2, Wm = MAPPER.wid / 2;
@@ -302,8 +341,16 @@
         foot.forEach(function (q, k) { var p = P(q[0], q[1], 0); if (k) ctx.lineTo(p[0], p[1]); else ctx.moveTo(p[0], p[1]); });
         ctx.closePath(); ctx.fillStyle = mapCol; ctx.globalAlpha = 0.9; ctx.fill(); ctx.globalAlpha = 1;
         ctx.strokeStyle = muted; ctx.lineWidth = 1; ctx.stroke();
-        ctx.beginPath(); seg([mx, 0, 0], [mx, 0, sim.hScanner]); ctx.strokeStyle = muted; ctx.lineWidth = 1.5; ctx.stroke();
-        var sp = P(mx, 0, sim.hScanner);
+        // Scanners at the body's rear corners, both on masts of height H_SCANNER:
+        // the other one as a small muted outline (a path, not an arc, so
+        // tests/perf3d.py's dot count is unchanged), the selected one active
+        var hS = sim.hScanner, scO = [mx + oO[0], oO[1], hS], scS = [mx + off[0], off[1], hS];
+        ctx.beginPath(); seg([scO[0], scO[1], 0], scO); ctx.strokeStyle = muted; ctx.globalAlpha = 0.6; ctx.lineWidth = 1; ctx.stroke();
+        var po = P(scO[0], scO[1], scO[2]);
+        ctx.beginPath(); ctx.rect(po[0] - 3, po[1] - 3, 6, 6); ctx.globalAlpha = 1; ctx.lineWidth = 1.2; ctx.stroke();
+        ctx.beginPath(); seg([scS[0], scS[1], 0], scS); ctx.strokeStyle = muted; ctx.lineWidth = 1.5; ctx.stroke();
+        var sp = P(scS[0], scS[1], scS[2]);
+        if (rec) rec.markers = { sel: scS, other: scO, mapper: foot.map(function (q) { return [q[0], q[1], 0]; }) };
         ctx.beginPath(); ctx.arc(sp[0], sp[1], 3.5, 0, 2 * Math.PI); ctx.fillStyle = shade(ptBase, 1); ctx.fill();
         if (showPlane) {
             // scanner marker at the plane's origin: an outlined diamond (paths, not arcs,
@@ -320,8 +367,9 @@
             if (!mask.keep[k]) continue;
             var p = sim.pts[k];
             if (p.t > tNow + 1e-9) continue;
-            var q = P(p.x, p.y, p.z);
+            var q = P(p.x + off[0], p.y + off[1], p.z + off[2]);
             vis.push([q[2], q[0], q[1], p.face]);
+            if (rec) rec.pts.push([k, p.x + off[0], p.y + off[1], p.z + off[2]]);
         }
         vis.sort(function (a, b) { return a[0] - b[0]; });
         var cur = null;
@@ -337,7 +385,12 @@
         if (cur !== null) ctx.fill();
 
         // Box now (while scanning)
-        if (progress < 1) wire(boxCorners(sim, tNow), objCol, null, 1.2);
+        if (progress < 1) {
+            var nowD = boxCorners(sim, tNow).map(D);
+            wire(nowD, objCol, null, 1.2);
+            if (rec) rec.boxes.now = nowD;
+        }
+        if (rec) { rec.tNow = tNow; rec.progress = progress; rec.cam = { yaw: cam.yaw, pitch: cam.pitch, zoom: cam.zoom }; window.mlsDrawRecord = rec; }
 
         // Axis hint
         ctx.fillStyle = muted; ctx.font = '12px ' + css('--font');
@@ -362,7 +415,7 @@
         var hasTop = sim.pts.some(function (p) { return p.face === 'top'; });
         if (noteTop) noteTop.hidden = hasTop;
         if (noteH) {
-            var t = 'Scanner height ' + sim.hScanner + ' m (illustrative, not from the thesis). It shifts where the plane cuts the box but not its length or order. The scan plane is drawn as a finite patch; the real plane extends further.';
+            var t = 'Scanner height ' + sim.hScanner + ' m (illustrative, not from the thesis, like the mounting position at the mapper\u2019s rear corners). It shifts where the plane cuts the box but not its length or order. The scan plane is drawn as a finite patch; the real plane extends further.';
             if (noteH.textContent !== t) noteH.textContent = t;
         }
     }
