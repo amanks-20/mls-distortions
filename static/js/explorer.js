@@ -382,15 +382,21 @@
         ctx.moveTo(X(mx - 2.25), Y(0.9)); ctx.lineTo(X(mx + 1.6), Y(0.9)); ctx.lineTo(X(mx + 2.25), Y(0));
         ctx.lineTo(X(mx + 1.6), Y(-0.9)); ctx.lineTo(X(mx - 2.25), Y(-0.9)); ctx.closePath();
         ctx.fill(); ctx.stroke();
-        // Scanners at the body's rear corners: the other one as a small muted
-        // outline, the selected one filled in its colour (red left, blue right)
-        var rM = Math.max(2.5, scale * 0.2);
-        ctx.beginPath(); ctx.arc(X(mx + offO[0]), Y(offO[1]), rM * 0.7, 0, 2 * Math.PI);
-        ctx.strokeStyle = muted; ctx.lineWidth = 1.2; ctx.stroke();
+        // Scanners at the body's rear corners, each filled in its own colour
+        // (red left, blue right): the selected one at full size, the other one
+        // solid at 60% of that size with a thin ring (the text colour on a light
+        // page, the background colour on a dark one) so it stands out against
+        // the pink body in both themes.
+        var rM = Math.max(2.5, scale * 0.2), rO = rM * 0.6;
+        var oxy = [X(mx + offO[0]), Y(offO[1])];
+        ctx.beginPath(); ctx.arc(oxy[0], oxy[1], rO, 0, 2 * Math.PI);
+        ctx.fillStyle = state.side === 'R' ? css('--left') : css('--right'); ctx.fill();
+        ctx.strokeStyle = ringColour(); ctx.lineWidth = 1; ctx.stroke();
         ctx.fillStyle = ptCol;
         ctx.beginPath(); ctx.arc(X(mx + off[0]), Y(off[1]), rM, 0, 2 * Math.PI); ctx.fill();
         if (rec) {
-            rec.markers = { sel: [mx + off[0], off[1]], other: [mx + offO[0], offO[1]], r: rM };
+            rec.markers = { sel: [mx + off[0], off[1]], other: [mx + offO[0], offO[1]], r: rM, rOther: rO,
+                            otherBox: [oxy[0] - rO - 1, oxy[1] - rO - 1, oxy[0] + rO + 1, oxy[1] + rO + 1] };
             rec.mapper = [[mx - 2.25, 0.9], [mx + 1.6, 0.9], [mx + 2.25, 0], [mx + 1.6, -0.9], [mx - 2.25, -0.9]];
             rec.tNow = tNow; rec.progress = progress;
             window.mlsDrawRecord = rec;
@@ -419,6 +425,15 @@
         ctx.beginPath(); ctx.moveTo(W - 18 - bar, H - 18); ctx.lineTo(W - 18, H - 18); ctx.stroke();
         ctx.font = '11px ' + css('--font'); ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
         ctx.fillText(step + ' m', W - 18, H - 22);
+    }
+
+    // Outline for the non-selected scanner marker: the theme's text colour on a
+    // light page, its background colour on a dark one (whichever separates the
+    // marker from the pink body better in that theme)
+    function ringColour() {
+        var m = /^#([0-9a-f]{6})$/i.exec(css('--bg')), n = m ? parseInt(m[1], 16) : 0xffffff;
+        var y = 0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255);
+        return y < 128 ? css('--bg') : css('--text');
     }
 
     function hexA(col, a) {

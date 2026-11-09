@@ -1,62 +1,62 @@
 {
  "A1-L": {
   "h": 360,
-  "sha": "958e258818a6f8268b1fe512b877a3882af5ef80dc8da256982dd029d445d676",
+  "sha": "5bb7a41976a22eba6849192d24a1ac412f278af656e8f6e6b71feb897e7c4ec0",
   "w": 572
  },
  "A1-R": {
   "h": 360,
-  "sha": "f38b5bd86a8aa29ca4a7b795b892507457a174cb6001d1126614b58d8f2d7683",
+  "sha": "7c6b9e979d20eda9bdacd8bc3bc74311e339ba903e0a7af9d832d8d123277244",
   "w": 572
  },
  "A2-L": {
   "h": 360,
-  "sha": "d415e921768c7a22d5c3357fbd8dfa40ddf4f1a396ec1663905095dab5328904",
+  "sha": "281c30397f8bd36139ddcbd92724f06000937978dc4b8a4aeb442ac68d38980b",
   "w": 572
  },
  "A2-R": {
   "h": 360,
-  "sha": "a0c1e4e2b7d994fb8854cdbfafeb1e71edb07341419a284550c8163cbd89f84b",
+  "sha": "09a416d847ce4eb2f5fae6b58be790dbdf3e29da7a3bc2cce93b208fc3f2998f",
   "w": 572
  },
  "A3-L": {
   "h": 360,
-  "sha": "713130062a0c2b922279f1fdd5501239886dc73cf37b034ea2b254891d4fd6b6",
+  "sha": "32c101b5672539b46924484a3ea6906d75831f87f5041446b94b81aa79b91639",
   "w": 572
  },
  "A3-R": {
   "h": 360,
-  "sha": "5847d7646f7170c763a223c49c11186569414a81f7a2963eb722949ecad2a438",
+  "sha": "e3a9952dd88b83eb3f916cfbba6b38eeda963e6a0abc68cd27414fe1b970708c",
   "w": 572
  },
  "B1-L": {
   "h": 360,
-  "sha": "5a6442a520cff7d3d9f5e16a1f936ee00498db53a81809f4bc71b1af7446eaae",
+  "sha": "07ae2b20b6f8ada12bb99edf91d20b8d55c7b59d546ef1d70090a877acad6b67",
   "w": 572
  },
  "B1-R": {
   "h": 360,
-  "sha": "fb7029ea7e46dacef5b2c364c5181ad601a8bff187abb4a2f78b1fb94947ef76",
+  "sha": "1fcd09e045ffc64642552901fbd82c902813f96ca6964a9d733a1e53a7caf245",
   "w": 572
  },
  "C1-L": {
   "h": 360,
-  "sha": "070e645f9c1d9719974a82fecfc8ebd50da12d5d1074fdb5e03a37443432b18f",
+  "sha": "ff9f02e4a2c1005e61233dd386b70279807cd3263b038c39af4e078d9aa5758e",
   "w": 572
  },
  "C1-R": {
   "h": 360,
-  "sha": "8d76700de96a812cab927cce8d7c662aa319832b9d0866bc321568d86862a530",
+  "sha": "b18602bde32965f9044322d5c8ac17a9ed7732d0c218fdfbd48d45e83ea1bc64",
   "w": 572
  },
  "D2-L": {
   "h": 360,
-  "sha": "1fe79e67509211601f9683ec17b947bd9c6b782b55dd17e62049e0c37e3c3436",
+  "sha": "75eb8148e226ed26d5fcf07ca5ff4f5140f5cbfa1a7adda332106094392b673d",
   "w": 572
  },
  "D2-R": {
   "h": 360,
-  "sha": "e2caa71ea2da410764883126d30120bfed7274c733cee4a3f19074cc6e69e0ac",
+  "sha": "e4aa9d0fa2643be2b6ebe9c033cc7f87e7bb9b14280ad7a34049db7d7b8effc8",
   "w": 572
  }
 }

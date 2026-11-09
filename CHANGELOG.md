@@ -6,7 +6,7 @@
 - Below 1340 px, the field panel now comes after the readouts (canvas, readouts, field panel).
 - 3D: draw the selected scanner's scan plane, with an on/off toggle.
 - 3D: scan-plane vertical tilt follows the mounting figure (upper half leans towards the direction of motion).
-- Scanners are drawn at the mapper's rear-left and rear-right corners (2D and 3D); the simulation is unchanged.
+- Scanners are drawn at the mapper's rear-left and rear-right corners (2D and 3D), the non-selected one as a smaller solid marker in its own colour; the simulation is unchanged.
 
 ## v1.1.0
 

@@ -341,16 +341,23 @@
         foot.forEach(function (q, k) { var p = P(q[0], q[1], 0); if (k) ctx.lineTo(p[0], p[1]); else ctx.moveTo(p[0], p[1]); });
         ctx.closePath(); ctx.fillStyle = mapCol; ctx.globalAlpha = 0.9; ctx.fill(); ctx.globalAlpha = 1;
         ctx.strokeStyle = muted; ctx.lineWidth = 1; ctx.stroke();
-        // Scanners at the body's rear corners, both on masts of height H_SCANNER:
-        // the other one as a small muted outline (a path, not an arc, so
-        // tests/perf3d.py's dot count is unchanged), the selected one active
+        // Scanners at the body's rear corners, both on masts of height H_SCANNER.
+        // The other one: a small solid diamond in its own colour (half-diagonal
+        // 3.5 px, half the selected scanner's 7 px diamond) with a thin ring (the
+        // text colour on a light page, the background colour on a dark one) so it
+        // stands out against the pink body. A path, not an arc, so
+        // tests/perf3d.py's dot count is unchanged.
         var hS = sim.hScanner, scO = [mx + oO[0], oO[1], hS], scS = [mx + off[0], off[1], hS];
-        ctx.beginPath(); seg([scO[0], scO[1], 0], scO); ctx.strokeStyle = muted; ctx.globalAlpha = 0.6; ctx.lineWidth = 1; ctx.stroke();
-        var po = P(scO[0], scO[1], scO[2]);
-        ctx.beginPath(); ctx.rect(po[0] - 3, po[1] - 3, 6, 6); ctx.globalAlpha = 1; ctx.lineWidth = 1.2; ctx.stroke();
+        var ob = P(scO[0], scO[1], 0), po = P(scO[0], scO[1], scO[2]), dO = 3.5;
+        ctx.beginPath(); seg([scO[0], scO[1], 0], scO); ctx.strokeStyle = muted; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(po[0], po[1] - dO); ctx.lineTo(po[0] + dO, po[1]); ctx.lineTo(po[0], po[1] + dO); ctx.lineTo(po[0] - dO, po[1]); ctx.closePath();
+        ctx.fillStyle = state.side === 'R' ? css('--left') : css('--right'); ctx.fill();
+        var bgc = rgb(css('--bg')), dark = 0.299 * bgc[0] + 0.587 * bgc[1] + 0.114 * bgc[2] < 128;
+        ctx.strokeStyle = dark ? css('--bg') : text; ctx.lineWidth = 1; ctx.stroke();
         ctx.beginPath(); seg([scS[0], scS[1], 0], scS); ctx.strokeStyle = muted; ctx.lineWidth = 1.5; ctx.stroke();
         var sp = P(scS[0], scS[1], scS[2]);
-        if (rec) rec.markers = { sel: scS, other: scO, mapper: foot.map(function (q) { return [q[0], q[1], 0]; }) };
+        if (rec) rec.markers = { sel: scS, other: scO, mapper: foot.map(function (q) { return [q[0], q[1], 0]; }),
+                                 otherBox: [Math.min(ob[0], po[0]) - dO - 1, Math.min(ob[1], po[1]) - dO - 1, Math.max(ob[0], po[0]) + dO + 1, Math.max(ob[1], po[1]) + dO + 1] };
         ctx.beginPath(); ctx.arc(sp[0], sp[1], 3.5, 0, 2 * Math.PI); ctx.fillStyle = shade(ptBase, 1); ctx.fill();
         if (showPlane) {
             // scanner marker at the plane's origin: an outlined diamond (paths, not arcs,
