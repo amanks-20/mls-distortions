@@ -6,12 +6,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Modeling Point Cloud Distortions in Mobile Laser Scanning | Singh &amp; Lohani</title>
-    <meta name="description" content="Why moving objects look shorter, longer, reversed or skewed in mobile laser scanning point clouds, with closed-form equations, an interactive simulator and a step-by-step primer. Editor's Choice, ASCE Journal of Surveying Engineering, 2026.">
+    <meta name="description" content="Why moving objects look shorter, longer, reversed or skewed in mobile laser scanning point clouds, with closed-form equations, an interactive 2D and 3D simulator and a step-by-step primer. Editor's Choice, ASCE Journal of Surveying Engineering, 2026.">
     <meta name="author" content="Aman Kumar Singh">
     <meta property="og:site_name" content="Aman Kumar Singh">
     <meta property="og:type" content="article">
     <meta property="og:title" content="Modeling Point Cloud Distortions in Mobile Laser Scanning">
-    <meta property="og:description" content="Closed-form equations for length, layover and parallelepiped distortions of moving objects in MLS point clouds, with an interactive simulator.">
+    <meta property="og:description" content="Closed-form equations for length, layover and parallelepiped distortions of moving objects in MLS point clouds, with an interactive 2D and 3D simulator.">
     <meta property="og:url" content="https://amanks-20.github.io/mls-distortions/">
     <meta property="og:image" content="https://amanks-20.github.io/mls-distortions/static/images/genesis.png">
     <meta name="twitter:card" content="summary_large_image">
@@ -205,7 +205,7 @@
         <section class="section wide" id="explorer">
             <p class="eyebrow">Interactive</p>
             <h2>Distortion explorer</h2>
-            <p>Set the speeds and directions, then press <strong>Play scan</strong>. The drawing is a top-view simulation of a 4 m × 2 m box scanned by a tilted profile scanner. It is computed from the geometry alone, without the equations, so you can watch the distortion emerge and compare it with what the equations predict.</p>
+            <p>Set the speeds and directions, then press <strong>Play scan</strong>. The simulation is computed from the geometry alone, without the equations, so you can watch the distortion emerge and compare it with what the equations predict. The 2D view is a top-view simulation of a 4 m × 2 m box scanned by a tilted profile scanner; the 3D view shows the same scan in three dimensions, with the scan plane of the selected scanner. For the thesis cases that have a real example (A2 and B1), the field data captured for that case appear beside the simulation.</p>
 
             <div class="explorer" id="explorer-app">
                 <div class="presets" role="group" aria-label="Test cases from the paper">
@@ -247,7 +247,7 @@
                         <div class="ctrl">
                             <label for="ex-phiv"><span>Vertical angle φ<sub>v</sub></span> <output for="ex-phiv"></output></label>
                             <input id="ex-phiv" type="range" min="0" max="70" step="1" value="30">
-                            <span class="hint">Affects β and α only (the top view is unchanged)</span>
+                            <span class="hint">Affects β and α. The 2D top view is unchanged; in 3D it tilts the scan plane.</span>
                         </div>
                         <div class="ctrl">
                             <label>Point density</label>
@@ -473,7 +473,7 @@
                 </details>
 
                 <h3>Limitations</h3>
-                <p>The model assumes constant straight-line velocities, flat ground, a single-channel 2D scanner and a rigid object that does not rotate. Validation used simulation only, because public MLS datasets lack ground-truth velocities for moving objects. Natural next steps are non-uniform motion, multi-beam 3D LiDAR, estimating object velocity from the distortion itself, and correcting distorted clouds with these equations.</p>
+                <p>The model assumes constant straight-line velocities, flat ground, a single-channel 2D scanner and a rigid object that does not rotate. Validation used simulation only, because public MLS datasets lack ground-truth velocities for moving objects. The field examples show the same distortions in real data. Their speeds are estimates, so they illustrate the effects and are not used for validation. Natural next steps are non-uniform motion, multi-beam 3D LiDAR, estimating object velocity from the distortion itself, and correcting distorted clouds with these equations.</p>
             </section>
 
             <!-- ==================== Resources ==================== -->
