@@ -13,6 +13,7 @@
 - Field example F36: the caption notes that the simulator places the object on the mapper's left, while this oncoming vehicle is on its right.
 - Mobile (up to 720 px): wide equations stay inside their cards (they scroll there instead of widening the page), equation numbers sit on their own row, and Eq. (5) is shown as two stacked lines; desktop is unchanged.
 - Changed: shortened the explorer intro and the readout footnote.
+- Changed: tightened the overview and the end of the primer.
 
 ## v1.1.0
 
