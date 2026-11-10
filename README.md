@@ -24,7 +24,7 @@ The page is static HTML, CSS and JavaScript, with no build step and no dependenc
 
 - **Distortion explorer:** the closed-form equations next to an independent scan simulation, with the thesis test cases as presets and a choice of left or right scanner. **Play scan** animates the scan.
 - **Point density control (Dense / Medium / Sparse):** display only. It thins the points drawn on the canvas; the simulation and the readouts are unchanged.
-- **Observed in the field:** for presets A2 and B1, a panel next to the simulation (below it on narrow screens) shows a moving vehicle from the Guwahati StreetMapper survey in the same regime (examples F38 and F36). The vehicle and mapper speeds shown there are estimates from the point clouds, not measured values.
+- **Observed in the field:** for presets A2 and B1, a panel next to the simulation (below it on narrow screens) shows a moving vehicle from the Guwahati StreetMapper survey in the same regime (examples F38 and F36). The vehicle and mapper speeds shown there are estimates from the point clouds, not measured values. The field images are renderings of short sections of a survey; the underlying data are not part of this repository and are not publicly available (see the paper's Data Availability Statement).
 - **2D / 3D view:** the 3D view scans the box with a tilted scan plane and shows only the faces the scanner sees; drag, pinch, scroll or use the arrow keys to rotate and zoom. The scanner height of 2.5 m is illustrative, not from the thesis; it shifts where the plane cuts the box but not its length or order. The readouts still describe the 2D model.
 - **Scan plane toggle:** in the 3D view, the scan plane of the selected scanner is drawn through the scanner and moves with the scan; the **Scan plane** button (3D only) shows or hides it.
 - **Scanner positions:** both scanners are drawn at the mapper's rear-left and rear-right corners, the selected one larger, in 2D and 3D. The mounting position is illustrative, not from the thesis, like the scanner height, and it is display only: the drawing is shifted, the simulated cloud is not.
@@ -112,3 +112,5 @@ The following are **not** covered by this licence and remain with their respecti
 ## Author
 
 [Aman Kumar Singh](https://amanks-20.github.io/), IIT Kanpur. Supervised by [Prof. Bharat Lohani](https://home.iitk.ac.in/~blohani/).
+
+Developed by A. K. Singh with coding assistance from Claude (Anthropic).
