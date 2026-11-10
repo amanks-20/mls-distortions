@@ -13,8 +13,10 @@
    their mean GPS times. ± is the bound from the two scanners sampling
    different parts of the object. Mapper speed is from the trajectory.
    θ follows the explorer: angle of the object's heading from the mapper's,
-   counter-clockwise positive. Images are top views in the explorer's frame
-   (mapper travels left to right, its left is up), points 0.5-3 m above ground.
+   counter-clockwise positive. Images are top views in the explorer's frame;
+   the arrow in each image shows the mapper's direction of travel (left to right
+   in F38 and F08, right to left in F36, which is rotated 180 degrees, not
+   mirrored), points 0.5-3 m above ground unless the caption says otherwise.
    ========================================================================== */
 (function () {
     'use strict';
@@ -66,7 +68,7 @@
             imageDark: 'static/images/field/F36-dark.webp',
             width: 960, height: 600,
             alt: 'Top view of real mobile laser scanning data. An oncoming vehicle to the right of the mapper appears twice, side by side: the left scanner’s copy (red) is sheared into a parallelogram and the right scanner’s copy (blue) has a different shape. The map is rotated 180° (not mirrored), so the mapper travels right to left and the vehicle appears above its path. Scale bar 1 m.',
-            caption: 'Contraction in the field. An oncoming vehicle to the right of the mapper met the scan lines head-on, so each scanner swept it quickly and recorded a shortened, sheared copy at a different place. The simulator always places the object on the mapper’s left; in this real example the oncoming vehicle is on the mapper’s right. The map is rotated 180° (not mirrored) so that the vehicle appears above the path. Estimated speeds: mapper 38 km/h, vehicle 30 ± 14 km/h, oncoming (θ ≈ 175°). Red: left scanner; blue: right scanner.',
+            caption: 'Contraction in the field. An oncoming vehicle to the right of the mapper met the scan lines head-on, so each scanner swept it quickly and recorded a shortened, sheared copy at a different place. The simulator always places the object on the mapper’s left; in this real example the oncoming vehicle is on the mapper’s right. The map is rotated 180° (not mirrored) so that the vehicle appears above the path. Points on the far side of the mapper’s path (on its left) are left out for clarity. Estimated speeds: mapper 38 km/h, vehicle 30 ± 14 km/h, oncoming (θ ≈ 175°). Red: left scanner; blue: right scanner.',
             vm: { kmh: 38 },
             vo: { kmh: 30, pm: 14 },
             theta: -175,

@@ -3,8 +3,8 @@
 
 Not part of the served site. The crop is drawn in the explorer's frame:
 x = mapper direction of travel (at the chosen time), y = mapper's left,
-metres, with a metre grid, a scale bar, a mapper-heading arrow and a north
-arrow. Points are coloured by scanner (red = left scanner / scanner 0,
+metres, with a metre grid, a scale bar, a mapper-heading arrow and (unless
+--no-north) a north arrow. Points are coloured by scanner (red = left scanner / scanner 0,
 blue = right scanner / scanner 1, as in the thesis figures and the explorer)
 or by GPS time.
 
@@ -23,18 +23,24 @@ LO..HI m to the left of the mapper's path (negative = right), between --hmin and
 --hmax above the road, and in an 8-connected streak (0.25 m cells, along-track x
 by lateral offset) at least --min-streak m long. The road level is taken along
 the track from the mapper's own lane (5th percentile of height in 2 m bins,
-|offset| < 1 m). Everything else is left out of the image. F38 was made with
+|offset| < 1 m). Everything else is left out of the image.
 
-    tools/.venv/bin/python tools/render_field.py --ids F38 --no-title --size 76 --shift -3.75 \
+The committed images in static/images/field share one layout (legend top centre,
+mapper arrow and label lower-left, scale bar lower-right, no north arrow) and were
+made with these commands (each also with --theme dark, which writes *-dark.webp):
+
+    tools/.venv/bin/python tools/render_field.py --ids F38 --no-title --no-north --size 76 --shift -3.75 \
         --lane 0.5 3.5 --hmin 0.3 --hmax 2.0 --min-streak 8 --dot 3.5 --out-dir static/images/field
-    (and the same with --theme dark)
+    tools/.venv/bin/python tools/render_field.py --ids F08 --no-title --no-north --out-dir static/images/field
+    tools/.venv/bin/python tools/render_field.py --ids F36 --no-title --no-north --rotate 180 --shift-left 1.53 \
+        --ground-shift-left 0.6 --drop-left-of-path 0 --out-dir static/images/field
 
-F36 is drawn rotated by 180 degrees, with the crop moved 0.6 m to the mapper's left so
-the mapper's path sits inside the frame (about 40 px from the edge), between the north
-arrow and the legend:
-
-    tools/.venv/bin/python tools/render_field.py --ids F36 --no-title --rotate 180 --shift-left 0.6 \
-        --out-dir static/images/field      (and the same with --theme dark)
+F36 is rotated by 180 degrees (a rotation, not a mirror), so the mapper travels right
+to left and the vehicle, on its right, is above the path. The crop is moved 1.53 m to
+the mapper's left so the path clears the lower annotations by at least 10 px, and the
+points on the far side of the path (the mapper's left, --drop-left-of-path 0) are left
+out. --ground-shift-left 0.6 keeps the ground cells of the earlier 0.6 m crop, so the
+vehicle's points are exactly those of that crop.
 """
 import argparse
 import io
@@ -72,20 +78,24 @@ def mapper_at(traj, t):
     return np.interp(t, T, traj["X"]), np.interp(t, T, traj["Y"]), math.atan2(vx, vy)   # course, rad from north (cw)
 
 
-def crop(scanners, cx, cy, half, hmin, hmax):
-    """Points within the square crop, with height above local ground."""
+def crop(scanners, cx, cy, half, hmin, hmax, anchor=None):
+    """Points within the square crop, with height above local ground.
+
+    Ground is the 5th height percentile in 1 m cells whose grid starts at anchor - 2 * half
+    (anchor defaults to the crop centre)."""
+    ax_, ay_ = anchor if anchor is not None else (cx, cy)
     pts = []
     for k, s in enumerate(scanners):
         m = (np.abs(s["x"] - cx) < half * 1.5) & (np.abs(s["y"] - cy) < half * 1.5)
         pts.append((k, s["x"][m], s["y"][m], s["z"][m], s["t"][m]))
     allx = np.concatenate([p[1] for p in pts]); ally = np.concatenate([p[2] for p in pts]); allz = np.concatenate([p[3] for p in pts])
-    gx = ((allx - (cx - 2 * half)) // 1).astype(int); gy = ((ally - (cy - 2 * half)) // 1).astype(int)
+    gx = ((allx - (ax_ - 2 * half)) // 1).astype(int); gy = ((ally - (ay_ - 2 * half)) // 1).astype(int)
     key = gx * 10000 + gy
     uk = np.unique(key)
     ground = {u: np.percentile(allz[key == u], 5) for u in uk}
     out = []
     for k, x, y, z, t in pts:
-        kk = ((x - (cx - 2 * half)) // 1).astype(int) * 10000 + ((y - (cy - 2 * half)) // 1).astype(int)
+        kk = ((x - (ax_ - 2 * half)) // 1).astype(int) * 10000 + ((y - (ay_ - 2 * half)) // 1).astype(int)
         hz = z - np.array([ground[q] for q in kk])
         m = (hz > hmin) & (hz < hmax)
         out.append((k, x[m], y[m], t[m]))
@@ -93,7 +103,7 @@ def crop(scanners, cx, cy, half, hmin, hmax):
 
 
 def render(scanners, traj, cx, cy, t, size, color, title, path, fmt, max_kb, hmin, hmax, stride, theme,
-           lane=None, min_streak=8.0, dot=1.6, rotate=0):
+           lane=None, min_streak=8.0, dot=1.6, rotate=0, show_north=True, drop_left=None, ground_anchor=None):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -106,7 +116,7 @@ def render(scanners, traj, cx, cy, t, size, color, title, path, fmt, max_kb, hmi
     ox, oy = cx, cy                                             # crop centre -> origin of the local frame
     # rotate=180 turns the map half a turn in the image plane (both image axes negated:
     # a rotation, determinant +1, never a mirror). Only the data layer turns; the text,
-    # arrows and legend are drawn upright, in the opposite corners.
+    # arrows and legend keep the standard layout and stay upright.
     rs = -1.0 if rotate == 180 else 1.0
 
     def to_local(x, y):
@@ -131,10 +141,14 @@ def render(scanners, traj, cx, cy, t, size, color, title, path, fmt, max_kb, hmi
     ax.plot(px, py, color=fg, lw=0.8, alpha=0.5, ls="--", zorder=1)
 
     cmap = plt.get_cmap("viridis")
-    tmin = min((p[3].min() for p in crop_cache(scanners, cx, cy, half, hmin, hmax) if len(p[3])), default=t)
-    tmax = max((p[3].max() for p in crop_cache(scanners, cx, cy, half, hmin, hmax) if len(p[3])), default=t + 1)
+    tmin = min((p[3].min() for p in crop_cache(scanners, cx, cy, half, hmin, hmax, ground_anchor) if len(p[3])), default=t)
+    tmax = max((p[3].max() for p in crop_cache(scanners, cx, cy, half, hmin, hmax, ground_anchor) if len(p[3])), default=t + 1)
     if lane is None:
-        layers = crop_cache(scanners, cx, cy, half, hmin, hmax)
+        layers = crop_cache(scanners, cx, cy, half, hmin, hmax, ground_anchor)
+        if drop_left is not None:
+            layers, dropped = drop_far_side(layers, traj, cx, cy, t, fwd, left, drop_left)
+            for k, n_drop, n_all in dropped:
+                print(f"  scanner {k}: {n_drop} of {n_all} points loaded around the crop dropped (more than {drop_left:g} m left of the mapper's path)")
     else:
         layers, stats = segment_streaks(scanners, traj, cx, cy, half, t, lane, hmin, hmax, min_streak, fwd, left)
         for k, st in stats.items():
@@ -147,33 +161,29 @@ def render(scanners, traj, cx, cy, t, size, color, title, path, fmt, max_kb, hmi
         ax.scatter(lx, ly, s=dot, c=c, lw=0, alpha=0.85, zorder=2, label=LABELS[k] if color == "scanner" else None)
 
     ax.set_xlim(-hx, hx); ax.set_ylim(-hy, hy); ax.set_aspect("equal"); ax.axis("off")
+    # Standard layout, the same in every figure (offsets are fractions of the crop width,
+    # so they land on the same pixels at any scale): scale bar lower-right, mapper arrow
+    # lower-left with its label to the right, legend top centre, north arrow (optional)
+    # top-right. The mapper arrow points the way the mapper moves in the image (right,
+    # or left when rotated), so with rotate=180 its head leads at the left end.
     sb = step * (2 if size > 16 else 1)
-    north = np.array([0.0, 1.0])
-    nl = rs * np.array([north @ fwd, north @ left]) * 0.06 * size
-    if rotate != 180:
-        # scale bar bottom-right, mapper arrow bottom-left pointing right, north arrow top-right
-        x0, y0 = hx - sb - 0.04 * size, -hy + 0.05 * size
-        ax.plot([x0, x0 + sb], [y0, y0], color=fg, lw=2, solid_capstyle="butt")
-        ax.text(x0 + sb / 2, y0 + 0.02 * size, f"{sb:g} m", color=fg, ha="center", va="bottom", fontsize=8)
-        ax.annotate("", xy=(-hx + 0.12 * size, -hy + 0.05 * size), xytext=(-hx + 0.03 * size, -hy + 0.05 * size),
-                    arrowprops=dict(arrowstyle="->", color=fg, lw=1.2))
-        ax.text(-hx + 0.13 * size, -hy + 0.05 * size, "mapper", color=fg, va="center", fontsize=8)
+    x0, y0 = hx - sb - 0.04 * size, -hy + 0.05 * size
+    ax.plot([x0, x0 + sb], [y0, y0], color=fg, lw=2, solid_capstyle="butt")
+    ax.text(x0 + sb / 2, y0 + 0.02 * size, f"{sb:g} m", color=fg, ha="center", va="bottom", fontsize=8)
+    a_l, a_r, ya = -hx + 0.03 * size, -hx + 0.12 * size, -hy + 0.05 * size
+    head, tail = (a_r, a_l) if rs > 0 else (a_l, a_r)
+    ax.annotate("", xy=(head, ya), xytext=(tail, ya), arrowprops=dict(arrowstyle="->", color=fg, lw=1.2))
+    ax.text(-hx + 0.13 * size, ya, "mapper", color=fg, va="center", fontsize=8)
+    if show_north:
+        north = np.array([0.0, 1.0])
+        nl = rs * np.array([north @ fwd, north @ left]) * 0.06 * size
         nc = np.array([hx - 0.06 * size, hy - 0.08 * size])
-    else:
-        # rotated: scale bar top-left, mapper arrow top-right pointing left, north arrow bottom-left
-        x0, y0 = -hx + 0.04 * size, hy - 0.05 * size
-        ax.plot([x0, x0 + sb], [y0, y0], color=fg, lw=2, solid_capstyle="butt")
-        ax.text(x0 + sb / 2, y0 - 0.02 * size, f"{sb:g} m", color=fg, ha="center", va="top", fontsize=8)
-        ax.annotate("", xy=(hx - 0.12 * size, hy - 0.05 * size), xytext=(hx - 0.03 * size, hy - 0.05 * size),
-                    arrowprops=dict(arrowstyle="->", color=fg, lw=1.2))
-        ax.text(hx - 0.13 * size, hy - 0.05 * size, "mapper", color=fg, ha="right", va="center", fontsize=8)
-        nc = np.array([-hx + 0.06 * size, -hy + 0.08 * size])
-    ax.annotate("", xy=tuple(nc + nl / 2), xytext=tuple(nc - nl / 2), arrowprops=dict(arrowstyle="->", color=fg, lw=1.2))
-    ax.text(*(nc + nl / 2 * 1.6), "N", color=fg, ha="center", va="center", fontsize=8)
+        ax.annotate("", xy=tuple(nc + nl / 2), xytext=tuple(nc - nl / 2), arrowprops=dict(arrowstyle="->", color=fg, lw=1.2))
+        ax.text(*(nc + nl / 2 * 1.6), "N", color=fg, ha="center", va="center", fontsize=8)
     if title:
         ax.text(-hx + 0.02 * size, hy - 0.03 * size, title, color=fg, va="top", fontsize=8)
     if color == "scanner":
-        ax.legend(loc="lower center" if rotate == 180 else "upper center", fontsize=7, frameon=True, facecolor=bg, edgecolor="none", framealpha=0.9, labelcolor=fg, markerscale=5 * math.sqrt(1.6 / dot), ncol=2)
+        ax.legend(loc="upper center", fontsize=7, frameon=True, facecolor=bg, edgecolor="none", framealpha=0.9, labelcolor=fg, markerscale=5 * math.sqrt(1.6 / dot), ncol=2)
 
     buf = io.BytesIO(); fig.savefig(buf, format="png", facecolor=bg); plt.close(fig)
     im = Image.open(io.BytesIO(buf.getvalue())).convert("RGB")
@@ -227,13 +237,34 @@ def segment_streaks(scanners, traj, cx, cy, half, t, lane, hmin, hmax, min_len, 
     return out, stats
 
 
+def path_offset(traj, t, cx, cy, fwd, left, x, y):
+    """Lateral offset (m) of points from the mapper's path, + = the mapper's left (as in segment_streaks)."""
+    sel = np.abs(traj["T"] - t) < 30
+    px = (traj["X"][sel] - cx) * fwd[0] + (traj["Y"][sel] - cy) * fwd[1]
+    py = (traj["X"][sel] - cx) * left[0] + (traj["Y"][sel] - cy) * left[1]
+    o = np.argsort(px)
+    lx = (x - cx) * fwd[0] + (y - cy) * fwd[1]; ly = (x - cx) * left[0] + (y - cy) * left[1]
+    return ly - np.interp(lx, px[o], py[o])
+
+
+def drop_far_side(layers, traj, cx, cy, t, fwd, left, limit):
+    """One-sided filter: leave out the points more than `limit` m to the mapper's left of its path.
+
+    Nothing on the mapper's right is touched. Returns the kept layers and (scanner, dropped, total) per scanner."""
+    out, dropped = [], []
+    for k, x, y, tt in layers:
+        far = path_offset(traj, t, cx, cy, fwd, left, x, y) > limit
+        out.append((k, x[~far], y[~far], tt[~far])); dropped.append((k, int(far.sum()), len(x)))
+    return out, dropped
+
+
 _cache = {}
 
 
-def crop_cache(scanners, cx, cy, half, hmin, hmax):
-    key = (round(cx, 2), round(cy, 2), half, hmin, hmax)
+def crop_cache(scanners, cx, cy, half, hmin, hmax, anchor=None):
+    key = (round(cx, 2), round(cy, 2), half, hmin, hmax, anchor)
     if key not in _cache:
-        _cache[key] = crop(scanners, cx, cy, half, hmin, hmax)
+        _cache[key] = crop(scanners, cx, cy, half, hmin, hmax, anchor)
     return _cache[key]
 
 
@@ -259,6 +290,12 @@ def main():
                     help="show only one vehicle: points LO..HI m left of the mapper's path (see the module docstring)")
     ap.add_argument("--min-streak", type=float, default=8.0, help="with --lane: minimum length (m) of a connected streak")
     ap.add_argument("--dot", type=float, default=1.6, help="point size (matplotlib s)")
+    ap.add_argument("--no-north", action="store_true", help="omit the north arrow")
+    ap.add_argument("--drop-left-of-path", type=float, default=None, metavar="M",
+                    help="leave out points more than M m to the mapper's left of its path (one-sided; the right is kept)")
+    ap.add_argument("--ground-shift-left", type=float, default=None, metavar="M",
+                    help="lay the 1 m ground cells as for a crop moved M m to the mapper's left (default: --shift-left),"
+                         " so a re-framed crop keeps exactly the same points")
     ap.add_argument("--shift-left", type=float, default=0.0, help="move the crop centre this many metres to the mapper's left")
     ap.add_argument("--rotate", type=int, choices=[0, 180], default=0,
                     help="180: turn the map half a turn in the image plane (a rotation, not a mirror); text stays upright")
@@ -285,12 +322,18 @@ def main():
             _, _, crs = mapper_at(traj, t)
             cx, cy = cx + a.shift * math.sin(crs), cy + a.shift * math.cos(crs)
             cx, cy = cx - a.shift_left * math.cos(crs), cy + a.shift_left * math.sin(crs)
+        anchor = None
+        if a.ground_shift_left is not None:
+            _, _, crs = mapper_at(traj, t)
+            bx, by = cx + a.shift_left * math.cos(crs), cy - a.shift_left * math.sin(crs)      # undo --shift-left
+            anchor = (bx - a.ground_shift_left * math.cos(crs), by + a.ground_shift_left * math.sin(crs))
         if a.no_title:
             title = ""
         suffix = "-dark" if a.theme == "dark" else ""
         path = os.path.join(a.out_dir, f"{name}{suffix}.{a.format}")
         n = render(scanners, traj, cx, cy, t, size, a.color, title, path, a.format, a.max_kb, a.hmin, a.hmax, a.stride, a.theme,
-                   lane=a.lane, min_streak=a.min_streak, dot=a.dot, rotate=a.rotate)
+                   lane=a.lane, min_streak=a.min_streak, dot=a.dot, rotate=a.rotate, show_north=not a.no_north,
+                   drop_left=a.drop_left_of_path, ground_anchor=anchor)
         print(f"{path}  {n / 1024:.0f} KB")
 
 

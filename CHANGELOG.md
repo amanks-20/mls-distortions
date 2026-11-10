@@ -17,6 +17,7 @@
 - Changed: shortened the FAQ answers.
 - Changed: in dark mode the simulation screenshot has a black frame instead of a white one (`static/images/sim-scene-dark.jpg`, made by `tools/make_sim_scene_dark.py`).
 - Changed: field image F36 (B1) is rotated 180° (not mirrored) so the vehicle appears above the mapper's path, with the mapper's path inside the frame; `tools/render_field.py` gains `--rotate 180` and `--shift-left`.
+- Changed: the three field images (F38, F08, F36; light and dark) share one layout: legend top centre, mapper arrow lower-left (pointing the way the mapper moves), scale bar lower-right, no north arrow. F36 is still rotated 180°; its crop moved to 1.53 m left of the original centre so the path clears the lower annotations, and the points on the far side of the mapper's path are left out (the vehicle's points are unchanged). `tools/render_field.py` gains `--no-north`, `--drop-left-of-path` and `--ground-shift-left`.
 
 ## v1.1.0
 
