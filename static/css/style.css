@@ -42,6 +42,8 @@
         --object: #4fb3d4;
         --mapper: #c86a96;
     }
+    /* figures have dark versions (tools/make_dark_figures.py) drawn on this card colour */
+    .fig-img:not(.photo) { background: var(--bg-alt); }
 }
 
 /* ---------- Base ---------- */
