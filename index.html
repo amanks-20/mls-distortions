@@ -179,24 +179,24 @@
                         <figcaption><strong>Distance does not matter.</strong> Moving the object farther away only spreads the left and right clouds apart. The tilts stay the same.</figcaption>
                     </figure>
                 </div>
-                <p>Both follow from the equations: distortion depends only on the speeds, the direction of travel and the scanner angles, with no distance term. Try the first with the Left/Right switch below.</p>
+                <p>Both follow from the equations: distortion depends only on the speeds, the direction of travel and the scanner angles, with no distance term. Try the side result with the Left/Right switch below.</p>
 
                 <h3>Common questions</h3>
                 <details class="faq">
                     <summary>Isn't this handled by motion compensation?</summary>
-                    <p>Standard compensation corrects for the scanner's own motion using GNSS and IMU data. That fixes static scenery but does nothing for an object with its own velocity. Correcting moving objects requires knowing, or estimating, how they moved. These equations describe exactly what that motion does to the cloud.</p>
+                    <p>No. Compensation removes the scanner's own motion, not the object's. Correcting a moving object needs its motion, known or estimated; these equations describe what that motion does to the cloud.</p>
                 </details>
                 <details class="faq">
                     <summary>Is this the same as the rolling-shutter effect?</summary>
-                    <p>It is closely related. Both happen because a scene is captured over time rather than all at once. Rolling shutter usually refers to the sensor's own motion; here the subject is the motion of the objects being scanned, relative to a moving scanner.</p>
+                    <p>It is a close analogy: both arise because a scene is captured over time rather than all at once. Here the distortion comes from an object's motion relative to a moving scanner that builds the cloud profile by profile.</p>
                 </details>
                 <details class="faq">
                     <summary>Why does it matter in practice?</summary>
-                    <p>Vehicle dimensions extracted from MLS data can be wrong by metres, layover can put the front of a vehicle where its back should be, and skewed boxes confuse object detectors and change-detection pipelines. Knowing the distortion lets you predict it, flag it, or remove it. It also opens the reverse problem: estimating an object's speed from how distorted it looks.</p>
+                    <p>Lengths read from MLS data can be wrong by metres, and skewed boxes can mislead object detection, tracking and mapping. Knowing the distortion lets you predict it, flag it, or in most cases correct it.</p>
                 </details>
                 <details class="faq">
                     <summary>What does the model assume?</summary>
-                    <p>Constant, straight-line velocities for both the mapper and the object; fixed scanner angles; flat ground; a single-channel 2D rotating scanner fast enough that each rotation is effectively instantaneous; and a rigid box-shaped object that does not rotate. Extending it to acceleration, turning objects and multi-beam 3D LiDAR is future work.</p>
+                    <p>Constant, straight-line velocities for both the mapper and the object; fixed scanner angles; flat ground; a single-channel 2D rotating scanner fast enough that each rotation is effectively instantaneous; and a rigid box-shaped object that does not rotate.</p>
                 </details>
             </section>
         </div>
@@ -404,7 +404,7 @@
                     <span class="num">(6)</span>
                 </div>
                 <p>with + for 0 ≤ θ &lt; 180° − φ<sub>h</sub> and − otherwise. When the sweep keeps pace with the object (v<sub>l</sub> = v<sub>o</sub>, same direction), the tilts become purely geometric: γ = φ<sub>γ</sub> and β = φ<sub>β</sub>.</p>
-                <p class="muted">The paper and thesis give the full derivations, the piecewise rules for each scanner, and summary tables for θ = 0°, 90° and 180°.</p>
+                <p class="muted">Full derivations and the piecewise rules are in the paper and thesis.</p>
             </section>
 
             <!-- ==================== Validation ==================== -->

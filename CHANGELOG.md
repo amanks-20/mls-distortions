@@ -14,6 +14,7 @@
 - Mobile (up to 720 px): wide equations stay inside their cards (they scroll there instead of widening the page), equation numbers sit on their own row, and Eq. (5) is shown as two stacked lines; desktop is unchanged.
 - Changed: shortened the explorer intro and the readout footnote.
 - Changed: tightened the overview and the end of the primer.
+- Changed: shortened the FAQ answers.
 
 ## v1.1.0
 
