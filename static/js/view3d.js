@@ -198,6 +198,121 @@
 
     var BOX_EDGES = [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]];
 
+    // ---------- low-poly mapper car (drawing only) ----------
+    // Inside the same 4.5 m x 1.8 m footprint as before (x -2.25..+2.25 m from the
+    // mapper centre, y -0.9..+0.9 m including the wheels), nose towards +x,
+    // CAR_H = 1.6 m high (below the 2.5 m scanner height). Convex parts, each an
+    // extruded side profile (x, z, half-width): a lower body with a sloped hood
+    // and a tapered tail (top surface CAR_TOP = 0.95 m, where the scanner stems
+    // start), a narrower cabin with a sloped windshield and rear window, and four
+    // round wheels. Only faces turned towards the camera are drawn for the body
+    // and cabin (convex, so they never overlap within a part).
+    // The body is 0.06 m narrower per side at the rear (0.84 m) than the 2D car,
+    // so the wheels' outer faces at y = +-0.90 m stand proud of it.
+    var CAR_H = 1.6, CAR_TOP = 0.95;
+    var CAR_BODY = [[-2.25, 0.30, 0.84], [-2.15, CAR_TOP, 0.83], [1.45, CAR_TOP, 0.82], [2.25, 0.72, 0.76], [2.25, 0.30, 0.78]];
+    var CAR_CABIN = [[-1.35, CAR_TOP, 0.70], [-0.95, CAR_H, 0.62], [0.45, CAR_H, 0.62], [1.10, CAR_TOP, 0.72]];
+    var CAR_GLASS = { 0: true, 2: true };              // cabin profile edges 0 (rear window) and 2 (windshield)
+    // Wheels: cylinders with their axis along y, WHEEL.seg segments, the tyre on
+    // the ground (axle height = radius). Each is split at the body side (|y| = 0.84
+    // m) into an inner part, painted before the body (the body covers it), and an
+    // outer part, painted after the body and cabin when it is on the camera's side.
+    var WHEEL = { r: 0.32, w: 0.22, seg: 20, axles: [1.35, -1.35], out: 0.90, split: 0.84, hub: 0.55 };
+    var TYRE = [44, 44, 48];                           // tread, both themes
+    var HUB = [92, 92, 98];                            // hub disc on the outer face
+    function carPart(prof, closeBase) {
+        // faces: one quad per profile edge (left-right), plus the two side polygons
+        var L = prof.map(function (q) { return [q[0], q[2], q[1]]; }), R = prof.map(function (q) { return [q[0], -q[2], q[1]]; });
+        var faces = [], n = prof.length, last = closeBase ? n : n - 1;
+        for (var i = 0; i < last; i++) {
+            var j = (i + 1) % n;
+            faces.push({ v: [L[i], L[j], R[j], R[i]], edge: i });
+        }
+        faces.push({ v: L.slice(), edge: -1 }, { v: R.slice().reverse(), edge: -2 });
+        return faces;
+    }
+    // One cylinder slice between |y| = y0 and y1 (y1 outer) on side sg (+1 left, -1 right)
+    function wheelSlice(ax, sg, y0, y1, withHub) {
+        var ring = function (y) {
+            var out = [];
+            for (var k = 0; k < WHEEL.seg; k++) {
+                var a = 2 * Math.PI * k / WHEEL.seg;
+                out.push([ax + WHEEL.r * Math.cos(a), sg * y, WHEEL.r + WHEEL.r * Math.sin(a)]);
+            }
+            return out;
+        };
+        var A = ring(y0), Bq = ring(y1), faces = [];
+        for (var k = 0; k < WHEEL.seg; k++) {
+            var k2 = (k + 1) % WHEEL.seg, mid = 2 * Math.PI * (k + 0.5) / WHEEL.seg;
+            faces.push({ v: [A[k], A[k2], Bq[k2], Bq[k]], n: [Math.cos(mid), 0, Math.sin(mid)], kind: 'tread' });
+        }
+        faces.push({ v: A.slice().reverse(), n: [0, -sg, 0], kind: 'disc' }, { v: Bq, n: [0, sg, 0], kind: 'disc' });
+        if (withHub) faces.push({ v: Bq.map(function (p) { return [ax + (p[0] - ax) * WHEEL.hub, p[1], WHEEL.r + (p[2] - WHEEL.r) * WHEEL.hub]; }),
+                                  n: [0, sg, 0], kind: 'hub' });
+        return faces;
+    }
+    var CAR_PARTS = (function () {
+        var wheels = [];
+        WHEEL.axles.forEach(function (ax) {
+            [1, -1].forEach(function (sg) {
+                wheels.push({ side: sg, inner: wheelSlice(ax, sg, WHEEL.out - WHEEL.w, WHEEL.split, false),
+                              outer: wheelSlice(ax, sg, WHEEL.split, WHEEL.out, true) });
+            });
+        });
+        return { wheels: wheels, body: carPart(CAR_BODY, true), cabin: carPart(CAR_CABIN, false) };
+    })();
+    function faceClass(nrm) {
+        var len = Math.hypot(nrm[0], nrm[1], nrm[2]), nz = nrm[2] / len, nx = nrm[0] / len, ny = nrm[1] / len;
+        return nz >= Math.max(Math.abs(nx), Math.abs(ny)) ? 'top' : Math.abs(nx) >= Math.abs(ny) ? (nx > 0 ? 'front' : 'back') : 'side';
+    }
+    function drawCar3D(ctx, mx, base, edgeCol, B, P, wheelEdge) {
+        function path(v) {
+            ctx.beginPath();
+            v.forEach(function (p, i) { var q = P(mx + p[0], p[1], p[2]); if (i) ctx.lineTo(q[0], q[1]); else ctx.moveTo(q[0], q[1]); });
+            ctx.closePath();
+        }
+        function facing(n) { return n[0] * B.f[0] + n[1] * B.f[1] + n[2] * B.f[2] > 1e-9; }   // the camera-side test
+        function paint(faces, isCabin) {
+            var c = [0, 0, 0], m = 0;                     // part centroid, to orient normals outwards
+            faces.forEach(function (f) { f.v.forEach(function (p) { c[0] += p[0]; c[1] += p[1]; c[2] += p[2]; m++; }); });
+            c = [c[0] / m, c[1] / m, c[2] / m];
+            faces.forEach(function (f) {
+                var a = f.v[0], b = f.v[1], d = f.v[2];
+                var u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], w = [d[0] - a[0], d[1] - a[1], d[2] - a[2]];
+                var nrm = [u[1] * w[2] - u[2] * w[1], u[2] * w[0] - u[0] * w[2], u[0] * w[1] - u[1] * w[0]];
+                var fc = [0, 0, 0];
+                f.v.forEach(function (p) { fc[0] += p[0] / f.v.length; fc[1] += p[1] / f.v.length; fc[2] += p[2] / f.v.length; });
+                if (nrm[0] * (fc[0] - c[0]) + nrm[1] * (fc[1] - c[1]) + nrm[2] * (fc[2] - c[2]) < 0) nrm = [-nrm[0], -nrm[1], -nrm[2]];
+                if (!facing(nrm)) return;                                                // turned away
+                // the box's face shading: top, side, front (+x), back (-x), by the dominant axis
+                var fct = FACE_SHADE[faceClass(nrm)];
+                if (isCabin && CAR_GLASS[f.edge]) fct *= 0.62;
+                path(f.v);
+                ctx.fillStyle = shade(base, fct); ctx.globalAlpha = 0.9; ctx.fill(); ctx.globalAlpha = 1;
+                ctx.strokeStyle = edgeCol; ctx.lineWidth = 1; ctx.stroke();
+            });
+        }
+        // A wheel slice, opaque: faces turned away first, then the visible ones,
+        // hub last. Tread quads are stroked in their own colour (no seams), the
+        // discs' rims in the wheel edge colour.
+        function paintWheel(faces) {
+            var back = [], front = [], hub = [];
+            faces.forEach(function (f) { (f.kind === 'hub' ? hub : facing(f.n) ? front : back).push(f); });
+            back.concat(front, hub).forEach(function (f) {
+                var col = f.kind === 'hub' ? HUB : TYRE, fct = f.kind === 'tread' ? FACE_SHADE[faceClass(f.n)] : FACE_SHADE.side;
+                if (f.kind === 'hub' && !facing(f.n)) return;
+                path(f.v);
+                ctx.fillStyle = shade(col, fct); ctx.fill();
+                ctx.strokeStyle = f.kind === 'tread' ? ctx.fillStyle : wheelEdge; ctx.lineWidth = f.kind === 'tread' ? 0.6 : 1; ctx.stroke();
+            });
+        }
+        var camSide = B.f[1] >= 0 ? 1 : -1;               // the camera is on the car's left (+y) or right
+        CAR_PARTS.wheels.forEach(function (w) { paintWheel(w.inner); if (w.side !== camSide) paintWheel(w.outer); });
+        paint(CAR_PARTS.body, false);
+        paint(CAR_PARTS.cabin, true);
+        CAR_PARTS.wheels.forEach(function (w) { if (w.side === camSide) paintWheel(w.outer); });
+    }
+
     function draw(cv, ctx, state, progress, targetPx) {
         var dpr = window.devicePixelRatio || 1;
         var W = cv.clientWidth, H = cv.clientHeight;
@@ -337,10 +452,7 @@
         // Mapper footprint on the ground and the scanner on its mast
         var mx = sim.vm * tNow, Lm = MAPPER.len / 2, Wm = MAPPER.wid / 2;
         var foot = [[mx - Lm, Wm], [mx + 1.6, Wm], [mx + Lm, 0], [mx + 1.6, -Wm], [mx - Lm, -Wm]];
-        ctx.beginPath();
-        foot.forEach(function (q, k) { var p = P(q[0], q[1], 0); if (k) ctx.lineTo(p[0], p[1]); else ctx.moveTo(p[0], p[1]); });
-        ctx.closePath(); ctx.fillStyle = mapCol; ctx.globalAlpha = 0.9; ctx.fill(); ctx.globalAlpha = 1;
-        ctx.strokeStyle = muted; ctx.lineWidth = 1; ctx.stroke();
+        drawCar3D(ctx, mx, rgb(mapCol), muted, B, P, shade(rgb(muted), 0.5));
         // Scanners at the body's rear corners, both on masts of height H_SCANNER.
         // The other one: a small solid diamond in its own colour (half-diagonal
         // 3.5 px, half the selected scanner's 7 px diamond) with a thin ring (the
@@ -349,12 +461,13 @@
         // tests/perf3d.py's dot count is unchanged.
         var hS = sim.hScanner, scO = [mx + oO[0], oO[1], hS], scS = [mx + off[0], off[1], hS];
         var ob = P(scO[0], scO[1], 0), po = P(scO[0], scO[1], scO[2]), dO = 3.5;
-        ctx.beginPath(); seg([scO[0], scO[1], 0], scO); ctx.strokeStyle = muted; ctx.lineWidth = 1.5; ctx.stroke();
+        // stems start on the car's top surface (z = CAR_TOP; the markers sit over the trunk)
+        ctx.beginPath(); seg([scO[0], scO[1], CAR_TOP], scO); ctx.strokeStyle = muted; ctx.lineWidth = 1.5; ctx.stroke();
         ctx.beginPath(); ctx.moveTo(po[0], po[1] - dO); ctx.lineTo(po[0] + dO, po[1]); ctx.lineTo(po[0], po[1] + dO); ctx.lineTo(po[0] - dO, po[1]); ctx.closePath();
         ctx.fillStyle = state.side === 'R' ? css('--left') : css('--right'); ctx.fill();
         var bgc = rgb(css('--bg')), dark = 0.299 * bgc[0] + 0.587 * bgc[1] + 0.114 * bgc[2] < 128;
         ctx.strokeStyle = dark ? css('--bg') : text; ctx.lineWidth = 1; ctx.stroke();
-        ctx.beginPath(); seg([scS[0], scS[1], 0], scS); ctx.strokeStyle = muted; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.beginPath(); seg([scS[0], scS[1], CAR_TOP], scS); ctx.strokeStyle = muted; ctx.lineWidth = 1.5; ctx.stroke();
         var sp = P(scS[0], scS[1], scS[2]);
         if (rec) rec.markers = { sel: scS, other: scO, mapper: foot.map(function (q) { return [q[0], q[1], 0]; }),
                                  otherBox: [Math.min(ob[0], po[0]) - dO - 1, Math.min(ob[1], po[1]) - dO - 1, Math.max(ob[0], po[0]) + dO + 1, Math.max(ob[1], po[1]) + dO + 1] };
@@ -422,7 +535,7 @@
         var hasTop = sim.pts.some(function (p) { return p.face === 'top'; });
         if (noteTop) noteTop.hidden = hasTop;
         if (noteH) {
-            var t = 'Scanner height ' + sim.hScanner + ' m (illustrative, not from the thesis, like the mounting position at the mapper\u2019s rear corners). It shifts where the plane cuts the box but not its length or order. The scan plane is drawn as a finite patch; the real plane extends further.';
+            var t = 'Scanner height ' + sim.hScanner + ' m (illustrative, not from the thesis, like the mounting position at the mapper\u2019s rear corners; the car is schematic). It shifts where the plane cuts the box but not its length or order. The scan plane is drawn as a finite patch; the real plane extends further.';
             if (noteH.textContent !== t) noteH.textContent = t;
         }
     }

@@ -20,6 +20,8 @@
 - Changed: the three field images (F38, F08, F36; light and dark) share one layout: legend top centre, mapper arrow lower-left (pointing the way the mapper moves), scale bar lower-right, no north arrow. F36 is still rotated 180°; its crop moved to 1.53 m left of the original centre so the path clears the lower annotations, and the points on the far side of the mapper's path are left out (the vehicle's points are unchanged). `tools/render_field.py` gains `--no-north`, `--drop-left-of-path` and `--ground-shift-left`.
 - Tests (dev only): the 2D canvas check pins the colour scheme and checks light and dark (headless Chrome had followed the macOS appearance, which made all 12 hashes fail), records the browser version in `tests/canvas-2d.json`, adds a browser-independent draw-call record (`tests/canvas-record.html`) that runs with the pixel hashes, waits for the explorer instead of a fixed delay, and serves the repo itself.
 - Changed: corrected the acknowledgements; added a data note and a development note to the README.
+- Changed: the mobile mapper is drawn as a car in the 2D and 3D views (the 3D note says the car is schematic); the point clouds and all results are unchanged.
+- Tests (dev only): `tests/canvas-2d.json` re-recorded for the car (same browser and flags; only the mapper drawing changed).
 
 ## v1.1.0
 

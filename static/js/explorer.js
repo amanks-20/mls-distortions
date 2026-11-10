@@ -376,12 +376,7 @@
 
         // Mobile mapper (4.5 m x 1.8 m), pointing along +x
         var mx = sim.vm * tNow;
-        ctx.fillStyle = hexA(css('--mapper') || '#f4a6c8', 0.9);
-        ctx.strokeStyle = muted; ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(X(mx - 2.25), Y(0.9)); ctx.lineTo(X(mx + 1.6), Y(0.9)); ctx.lineTo(X(mx + 2.25), Y(0));
-        ctx.lineTo(X(mx + 1.6), Y(-0.9)); ctx.lineTo(X(mx - 2.25), Y(-0.9)); ctx.closePath();
-        ctx.fill(); ctx.stroke();
+        drawCar(mx);
         // Scanners at the body's rear corners, each filled in its own colour
         // (red left, blue right): the selected one at full size, the other one
         // solid at 60% of that size with a thin ring (the text colour on a light
@@ -405,6 +400,52 @@
         // Heading arrows
         arrow(18, H - 18, [1, 0], 'mapper', muted);
         arrow(sim.u[0] < 0 ? 40 : 18, H - 40, sim.u, 'object', objCol);
+
+        // Schematic top-view car inside the same 4.5 m x 1.8 m footprint as before
+        // (x -2.25..+2.25 m from the centre, y -0.9..+0.9 m), nose towards +x.
+        // Body: rear corners radius 0.18 m, nose corners 0.45 m, the nose 0.08 m
+        // narrower per side than the rear. Windshield (front, larger) and rear
+        // window are darker quadrilaterals, the roof a lighter panel
+        // between them; the trunk behind the rear window (x < -1.35 m) stays plain
+        // body colour, so the scanner markers at x = -1.7 m sit on it.
+        function drawCar(cxm) {
+            var base = css('--mapper') || '#f4a6c8';
+            function P(pts) {
+                ctx.beginPath(); ctx.moveTo(X(cxm + pts[0][0]), Y(pts[0][1]));
+                for (var i = 1; i < pts.length; i++) ctx.lineTo(X(cxm + pts[i][0]), Y(pts[i][1]));
+                ctx.closePath();
+            }
+            function Q(cx1, cy1, x1, y1) { ctx.quadraticCurveTo(X(cxm + cx1), Y(cy1), X(cxm + x1), Y(y1)); }
+            function C(ax, ay, bx, by, x1, y1) { ctx.bezierCurveTo(X(cxm + ax), Y(ay), X(cxm + bx), Y(by), X(cxm + x1), Y(y1)); }
+            ctx.beginPath();
+            ctx.moveTo(X(cxm - 2.25), Y(0.72));
+            Q(-2.25, 0.9, -2.07, 0.9);
+            // flank to nose: a cubic that leaves the full-width flank and enters the
+            // nose corner horizontally, so the outline has no kink
+            ctx.lineTo(X(cxm + 0.6), Y(0.9)); C(1.2, 0.9, 1.5, 0.82, 1.8, 0.82);
+            Q(2.25, 0.82, 2.25, 0.37);
+            ctx.lineTo(X(cxm + 2.25), Y(-0.37));
+            Q(2.25, -0.82, 1.8, -0.82);
+            C(1.5, -0.82, 1.2, -0.9, 0.6, -0.9); ctx.lineTo(X(cxm - 2.07), Y(-0.9));
+            Q(-2.25, -0.9, -2.25, -0.72);
+            ctx.closePath();
+            ctx.fillStyle = hexA(base, 0.9); ctx.fill();
+            ctx.strokeStyle = muted; ctx.lineWidth = 1; ctx.stroke();
+            // roof: a lighter pink, clearly lighter on the light page (0.45 towards
+            // white), less so on the dark page, where 0.18 already reads well
+            ctx.fillStyle = mix(base, 255, ringColour() === css('--bg') ? 0.18 : 0.45, 0.9);
+            P([[-0.95, 0.62], [0.45, 0.62], [0.45, -0.62], [-0.95, -0.62]]); ctx.fill();
+            ctx.fillStyle = mix(base, 0, 0.32, 0.9);                         // glass
+            P([[0.45, 0.62], [1.1, 0.72], [1.1, -0.72], [0.45, -0.62]]); ctx.fill();       // windshield
+            P([[-1.35, 0.68], [-0.95, 0.62], [-0.95, -0.62], [-1.35, -0.68]]); ctx.fill(); // rear window
+        }
+        // col mixed towards grey level g (0 black, 255 white) by f, with alpha a
+        function mix(col, g, f, a) {
+            var m = /^#([0-9a-f]{6})$/i.exec(col);
+            if (!m) return col;
+            var n = parseInt(m[1], 16), c = [n >> 16, (n >> 8) & 255, n & 255].map(function (v) { return Math.round(v + (g - v) * f); });
+            return 'rgba(' + c.join(',') + ',' + a + ')';
+        }
 
         function arrow(x, y, v, label, col) {
             ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = 1.5;
