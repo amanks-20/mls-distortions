@@ -1,62 +1,178 @@
 {
- "A1-L": {
-  "h": 360,
-  "sha": "5bb7a41976a22eba6849192d24a1ac412f278af656e8f6e6b71feb897e7c4ec0",
-  "w": 572
+ "_browser": {
+  "flags": "--headless=new --disable-gpu --force-device-scale-factor=1 --window-size=1500,2500 --blink-settings=preferredColorScheme=<0 dark | 1 light>",
+  "version": "Google Chrome 157.0.8103.39"
  },
- "A1-R": {
-  "h": 360,
-  "sha": "7c6b9e979d20eda9bdacd8bc3bc74311e339ba903e0a7af9d832d8d123277244",
-  "w": 572
+ "dark": {
+  "A1-L": {
+   "draw_calls": 625,
+   "draw_sha": "8b97cfbefc21f50cc3b0b483d71bf8067e1c26917e1a35cc3e7f2b8acd7e2c10",
+   "h": 360,
+   "sha": "5bb7a41976a22eba6849192d24a1ac412f278af656e8f6e6b71feb897e7c4ec0",
+   "w": 572
+  },
+  "A1-R": {
+   "draw_calls": 569,
+   "draw_sha": "483a845c75e7334148cc485ed5e2427d7fd2ccbe30dc5c4af2972e656c8fafea",
+   "h": 360,
+   "sha": "7c6b9e979d20eda9bdacd8bc3bc74311e339ba903e0a7af9d832d8d123277244",
+   "w": 572
+  },
+  "A2-L": {
+   "draw_calls": 591,
+   "draw_sha": "9698342f774463ff6840e5df006fc139a39a54965b27463b063da64c92a10d33",
+   "h": 360,
+   "sha": "281c30397f8bd36139ddcbd92724f06000937978dc4b8a4aeb442ac68d38980b",
+   "w": 572
+  },
+  "A2-R": {
+   "draw_calls": 569,
+   "draw_sha": "ab3d96d6bd677091e3d80a2edfe2252d150488d3b605d5f16869436411bfbb4a",
+   "h": 360,
+   "sha": "09a416d847ce4eb2f5fae6b58be790dbdf3e29da7a3bc2cce93b208fc3f2998f",
+   "w": 572
+  },
+  "A3-L": {
+   "draw_calls": 339,
+   "draw_sha": "6758141d6d50db5681e8b32f8e7f7f8f4d7712508ad8acd83500adc576bf7898",
+   "h": 360,
+   "sha": "32c101b5672539b46924484a3ea6906d75831f87f5041446b94b81aa79b91639",
+   "w": 572
+  },
+  "A3-R": {
+   "draw_calls": 329,
+   "draw_sha": "2f692005e5435c43b235eb99bceb675c5b3c34c1dec44be86b75bf2b3d7386fd",
+   "h": 360,
+   "sha": "e3a9952dd88b83eb3f916cfbba6b38eeda963e6a0abc68cd27414fe1b970708c",
+   "w": 572
+  },
+  "B1-L": {
+   "draw_calls": 465,
+   "draw_sha": "790534c366350d5cac13705fc9b5dbfee9cc370363759eb543a92bf314b1deca",
+   "h": 360,
+   "sha": "07ae2b20b6f8ada12bb99edf91d20b8d55c7b59d546ef1d70090a877acad6b67",
+   "w": 572
+  },
+  "B1-R": {
+   "draw_calls": 425,
+   "draw_sha": "03164286efe88bc6aff87a44788b780bdd4d192439c2754dc9ad46a3f8f1e369",
+   "h": 360,
+   "sha": "1fcd09e045ffc64642552901fbd82c902813f96ca6964a9d733a1e53a7caf245",
+   "w": 572
+  },
+  "C1-L": {
+   "draw_calls": 339,
+   "draw_sha": "d131b628d6b9100e0d2fba60508d86bbd0f7520487e2f6bc1b034bbecf8d22d1",
+   "h": 360,
+   "sha": "ff9f02e4a2c1005e61233dd386b70279807cd3263b038c39af4e078d9aa5758e",
+   "w": 572
+  },
+  "C1-R": {
+   "draw_calls": 627,
+   "draw_sha": "542f9de7b2f7606c7a8501e0ad4b0b0b1806ed281e71b8bf7e0d35e07cf46b29",
+   "h": 360,
+   "sha": "b18602bde32965f9044322d5c8ac17a9ed7732d0c218fdfbd48d45e83ea1bc64",
+   "w": 572
+  },
+  "D2-L": {
+   "draw_calls": 421,
+   "draw_sha": "8a939b5d7760f0d0085ffc13010c9ae756c6e5f000567956ae7bd369842f5a45",
+   "h": 360,
+   "sha": "75eb8148e226ed26d5fcf07ca5ff4f5140f5cbfa1a7adda332106094392b673d",
+   "w": 572
+  },
+  "D2-R": {
+   "draw_calls": 467,
+   "draw_sha": "c64ef2c50db184ef6ded3acf5fd7efe46cfbf053030efce32bf509ec819c0230",
+   "h": 360,
+   "sha": "e4aa9d0fa2643be2b6ebe9c033cc7f87e7bb9b14280ad7a34049db7d7b8effc8",
+   "w": 572
+  }
  },
- "A2-L": {
-  "h": 360,
-  "sha": "281c30397f8bd36139ddcbd92724f06000937978dc4b8a4aeb442ac68d38980b",
-  "w": 572
- },
- "A2-R": {
-  "h": 360,
-  "sha": "09a416d847ce4eb2f5fae6b58be790dbdf3e29da7a3bc2cce93b208fc3f2998f",
-  "w": 572
- },
- "A3-L": {
-  "h": 360,
-  "sha": "32c101b5672539b46924484a3ea6906d75831f87f5041446b94b81aa79b91639",
-  "w": 572
- },
- "A3-R": {
-  "h": 360,
-  "sha": "e3a9952dd88b83eb3f916cfbba6b38eeda963e6a0abc68cd27414fe1b970708c",
-  "w": 572
- },
- "B1-L": {
-  "h": 360,
-  "sha": "07ae2b20b6f8ada12bb99edf91d20b8d55c7b59d546ef1d70090a877acad6b67",
-  "w": 572
- },
- "B1-R": {
-  "h": 360,
-  "sha": "1fcd09e045ffc64642552901fbd82c902813f96ca6964a9d733a1e53a7caf245",
-  "w": 572
- },
- "C1-L": {
-  "h": 360,
-  "sha": "ff9f02e4a2c1005e61233dd386b70279807cd3263b038c39af4e078d9aa5758e",
-  "w": 572
- },
- "C1-R": {
-  "h": 360,
-  "sha": "b18602bde32965f9044322d5c8ac17a9ed7732d0c218fdfbd48d45e83ea1bc64",
-  "w": 572
- },
- "D2-L": {
-  "h": 360,
-  "sha": "75eb8148e226ed26d5fcf07ca5ff4f5140f5cbfa1a7adda332106094392b673d",
-  "w": 572
- },
- "D2-R": {
-  "h": 360,
-  "sha": "e4aa9d0fa2643be2b6ebe9c033cc7f87e7bb9b14280ad7a34049db7d7b8effc8",
-  "w": 572
+ "light": {
+  "A1-L": {
+   "draw_calls": 625,
+   "draw_sha": "5c234961d57161e18a6a03f37837a05bafe8753bb3b2ad0f1a1c3679cad915b3",
+   "h": 360,
+   "sha": "68e894f996089f9b6549edf2a80a08df489aa1e055683b8c09858540072cf020",
+   "w": 572
+  },
+  "A1-R": {
+   "draw_calls": 569,
+   "draw_sha": "4be03a33577fbe5fc13cfb3244f6fc760308b75ba6a391a0efcdad44eb3fe2fc",
+   "h": 360,
+   "sha": "bccbfa9f844d0725ff428e9ac12e2c43d27445163ee6d84bf0c63cbfb49e56ef",
+   "w": 572
+  },
+  "A2-L": {
+   "draw_calls": 591,
+   "draw_sha": "0d9839758bf04f6bc4038a25766de6e25ad38daad988354c07b3cdbb0e99161d",
+   "h": 360,
+   "sha": "45b3243c30fcf8951c7e8332c913d2e812d172adc5b96a55aacdf1416ef41773",
+   "w": 572
+  },
+  "A2-R": {
+   "draw_calls": 569,
+   "draw_sha": "71e7394723e12933a3758b60902a0da9c4692879775b8d48455e9ae27d063364",
+   "h": 360,
+   "sha": "b57d9b7ddac86c95f193faf1171a804c5c389f77679847aa8b18413d9f2817bc",
+   "w": 572
+  },
+  "A3-L": {
+   "draw_calls": 339,
+   "draw_sha": "8b3f5741907cf9a747833bc5d3650db226838cff1f4bb73d47ae8795803c8341",
+   "h": 360,
+   "sha": "a9483bacb2a910a86fc1e896f5be0b86099ed6840dcc1c2a9d8d56b773dc41ac",
+   "w": 572
+  },
+  "A3-R": {
+   "draw_calls": 329,
+   "draw_sha": "7862deecc48132ad31d62b76857a4b6f600650a352730411365ce2a0c6c2615f",
+   "h": 360,
+   "sha": "709b29d3a32817e2a41b6d9bdcd9bcac2785be37404d450662fe753c80113020",
+   "w": 572
+  },
+  "B1-L": {
+   "draw_calls": 465,
+   "draw_sha": "b0c099ff37080ae022569650def9fd68e8a5be06a66a6221948bfceb47f4a45c",
+   "h": 360,
+   "sha": "568a4e796e8756b7d533a73670e3f007b564aa79683e1b1e60bff2548d2725e1",
+   "w": 572
+  },
+  "B1-R": {
+   "draw_calls": 425,
+   "draw_sha": "cdad971c30f920a2ebf7ab7d3b951c674619a3682fac8f61b6634c419b6cbddb",
+   "h": 360,
+   "sha": "ed756f5972718e1b21b4102d35a1894004feca1f33a54375795b07cb3f884876",
+   "w": 572
+  },
+  "C1-L": {
+   "draw_calls": 339,
+   "draw_sha": "eebbe420dcca2bda98daba087f2f23404997e40862274d1a72699f6cf5bb254f",
+   "h": 360,
+   "sha": "eac59b1d10abaf020da19567961b3415278603d3ef161d596eedb3262e6a9ec1",
+   "w": 572
+  },
+  "C1-R": {
+   "draw_calls": 627,
+   "draw_sha": "f1c26a3efb1c45bb369c4c143e8d61d2b4953d48374e0a68fc0e10dd925c21c4",
+   "h": 360,
+   "sha": "4a01593d8d6459ed397e1ed5c655f88f649588f46b450a4c2a03ee5d3aed62e9",
+   "w": 572
+  },
+  "D2-L": {
+   "draw_calls": 421,
+   "draw_sha": "50806522de7424467b02b2989846a26061f9b5be795b42df82f42c1c75e19c39",
+   "h": 360,
+   "sha": "56bfa15ca4e91fbddf61f6eebdb469c8cab255206ba0302b28327fed24b48556",
+   "w": 572
+  },
+  "D2-R": {
+   "draw_calls": 467,
+   "draw_sha": "e9ae55e45dfee33e9a36ba181eba6ab9945943cd4ef4ba512c073bfe316c9fb5",
+   "h": 360,
+   "sha": "c1dfa33f2d59a633fcfe1b9ecb771ae729e721b6bc258ce7e3f476e88830313e",
+   "w": 572
+  }
  }
 }

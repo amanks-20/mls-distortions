@@ -6,7 +6,8 @@
 <!-- Dev-only. Serve the repo root (python3 -m http.server) and open
      /tests/canvas-capture.html. Loads the explorer for every preset x side
      (end of scan, as after ?case=…) and writes a SHA-256 of each canvas's
-     PNG data into #out. Add ?view=3d&case=… is NOT used: 2D only. -->
+     PNG data into #out, with whether the page saw prefers-color-scheme: dark
+     (the canvas colours follow the theme). Add ?view=3d&case=… is NOT used: 2D only. -->
 </head>
 <body>
 <pre id="out">pending</pre>
@@ -21,7 +22,19 @@
         return new Promise(function (ok) {
             var f = document.createElement('iframe');
             f.style.width = '1440px'; f.style.height = '2400px';
-            f.onload = function () { setTimeout(function () { ok(f); }, 400); };
+            // Wait until the explorer has sized its canvas and can redraw (a fixed delay
+            // sometimes caught the 300 x 150 default canvas under load), then fonts, then 400 ms (timers, not
+            // requestAnimationFrame, which does not run under --virtual-time-budget).
+            f.onload = function () {
+                (function poll() {
+                    var w = f.contentWindow, cv = f.contentDocument.querySelector('#explorer canvas');
+                    // style.css applied (the canvas colours come from its tokens) and explorer.js ran;
+                    // no time limit: virtual time races ahead, the caller times out and retries
+                    if (cv && cv.width !== 300 && w.mlsRedraw && w.getComputedStyle(f.contentDocument.documentElement).getPropertyValue('--left').trim()) {
+                        f.contentDocument.fonts.ready.then(function () { setTimeout(function () { ok(f); }, 400); });
+                    } else setTimeout(poll, 50);
+                })();
+            };
             f.src = src;
             document.body.appendChild(f);
         });
@@ -30,7 +43,8 @@
         var f = await load('/index.html?case=' + c + '&side=' + s);
         var cv = f.contentDocument.querySelector('#explorer canvas');
         var url = cv ? cv.toDataURL('image/png') : '';
-        res[c + '-' + s] = { w: cv ? cv.width : 0, h: cv ? cv.height : 0, sha: url ? await sha(url) : null };
+        res[c + '-' + s] = { w: cv ? cv.width : 0, h: cv ? cv.height : 0, sha: url ? await sha(url) : null,
+                             dark: f.contentWindow.matchMedia('(prefers-color-scheme: dark)').matches };
         f.remove();
     }
     document.getElementById('out').textContent = 'RESULT ' + JSON.stringify(res);

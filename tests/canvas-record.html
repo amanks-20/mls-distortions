@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Canvas draw record (dev only)</title>
+<!-- Dev-only, browser-independent companion of canvas-capture.html. Serve the
+     repo root and open /tests/canvas-record.html (tests/canvas_capture.py does
+     this). For every preset x side it loads the explorer (end of scan, as after
+     ?case=…), wraps the 2D canvas context, sets window.mlsRecordDraw and calls
+     window.mlsRedraw(), and logs every draw call: method name and arguments
+     (coordinates, text strings) and every style property set (fillStyle,
+     strokeStyle, lineWidth, font, globalAlpha, …). Nothing is rasterised, so
+     the log does not depend on the browser's antialiasing or font rendering.
+     Numbers are rounded to 1e-6 before hashing. #out gets, per canvas, the
+     number of calls and a SHA-256 of the log; with ?full=1 also the log and
+     window.mlsDrawRecord. -->
+</head>
+<body>
+<pre id="out">pending</pre>
+<script>
+(async function () {
+    var cases = ['A1', 'B1', 'A3', 'A2', 'C1', 'D2'], sides = ['L', 'R'], res = {};
+    var full = /[?&]full=1/.test(location.search);
+    var PROPS = ['fillStyle', 'strokeStyle', 'lineWidth', 'lineCap', 'lineJoin', 'miterLimit', 'lineDashOffset', 'font',
+                 'textAlign', 'textBaseline', 'direction', 'globalAlpha', 'globalCompositeOperation', 'shadowBlur',
+                 'shadowColor', 'shadowOffsetX', 'shadowOffsetY', 'imageSmoothingEnabled', 'filter'];
+    async function sha(s) {
+        var b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+        return Array.from(new Uint8Array(b)).map(function (x) { return x.toString(16).padStart(2, '0'); }).join('');
+    }
+    function norm(v) {
+        if (typeof v === 'number') return Math.round(v * 1e6) / 1e6;
+        if (Array.isArray(v)) return v.map(norm);
+        if (v && typeof v === 'object') return '[' + (v.constructor && v.constructor.name) + ']';
+        return v;
+    }
+    function wrap(ctx, log) {
+        var proto = Object.getPrototypeOf(ctx);
+        Object.getOwnPropertyNames(proto).forEach(function (k) {
+            var d = Object.getOwnPropertyDescriptor(proto, k);
+            if (typeof d.value === 'function' && k !== 'constructor' && k !== 'getContextAttributes') {
+                ctx[k] = function () { log.push([k].concat(Array.prototype.slice.call(arguments).map(norm))); return d.value.apply(ctx, arguments); };
+            }
+        });
+        PROPS.forEach(function (k) {
+            var d = Object.getOwnPropertyDescriptor(proto, k);
+            if (!d || !d.set) return;
+            Object.defineProperty(ctx, k, {
+                configurable: true,
+                get: function () { return d.get.call(ctx); },
+                set: function (v) { log.push(['=' + k, norm(v)]); d.set.call(ctx, v); }
+            });
+        });
+    }
+    function load(src) {
+        return new Promise(function (ok) {
+            var f = document.createElement('iframe');
+            f.style.width = '1440px'; f.style.height = '2400px';
+            // Wait until the explorer has sized its canvas and can redraw (a fixed delay
+            // sometimes caught the 300 x 150 default canvas under load), then fonts, then 400 ms (timers, not
+            // requestAnimationFrame, which does not run under --virtual-time-budget).
+            f.onload = function () {
+                (function poll() {
+                    var w = f.contentWindow, cv = f.contentDocument.querySelector('#explorer canvas');
+                    // style.css applied (the canvas colours come from its tokens) and explorer.js ran;
+                    // no time limit: virtual time races ahead, the caller times out and retries
+                    if (cv && cv.width !== 300 && w.mlsRedraw && w.getComputedStyle(f.contentDocument.documentElement).getPropertyValue('--left').trim()) {
+                        f.contentDocument.fonts.ready.then(function () { setTimeout(function () { ok(f); }, 400); });
+                    } else setTimeout(poll, 50);
+                })();
+            };
+            f.src = src;
+            document.body.appendChild(f);
+        });
+    }
+    for (var c of cases) for (var s of sides) {
+        var f = await load('/index.html?case=' + c + '&side=' + s);
+        var w = f.contentWindow, cv = f.contentDocument.querySelector('#explorer canvas'), log = [];
+        var ctx = cv.getContext('2d');
+        wrap(ctx, log);
+        w.mlsRecordDraw = true; w.mlsRedraw(); w.mlsRecordDraw = false;
+        var text = JSON.stringify(log);
+        var r = { calls: log.length, sha: await sha(text), w: cv.width, h: cv.height,
+                  dark: w.matchMedia('(prefers-color-scheme: dark)').matches };
+        if (full) { r.log = log; r.record = w.mlsDrawRecord; }
+        res[c + '-' + s] = r;
+        f.remove();
+    }
+    document.getElementById('out').textContent = 'RESULT ' + JSON.stringify(res);
+})();
+</script>
+</body>
+</html>
