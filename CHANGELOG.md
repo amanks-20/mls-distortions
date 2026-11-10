@@ -15,6 +15,7 @@
 - Changed: shortened the explorer intro and the readout footnote.
 - Changed: tightened the overview and the end of the primer.
 - Changed: shortened the FAQ answers.
+- Changed: in dark mode the simulation screenshot has a black frame instead of a white one (`static/images/sim-scene-dark.jpg`, made by `tools/make_sim_scene_dark.py`).
 
 ## v1.1.0
 
