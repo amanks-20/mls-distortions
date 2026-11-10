@@ -16,6 +16,7 @@
 - Changed: tightened the overview and the end of the primer.
 - Changed: shortened the FAQ answers.
 - Changed: in dark mode the simulation screenshot has a black frame instead of a white one (`static/images/sim-scene-dark.jpg`, made by `tools/make_sim_scene_dark.py`).
+- Changed: field image F36 (B1) is rotated 180° (not mirrored) so the vehicle appears above the mapper's path, with the mapper's path inside the frame; `tools/render_field.py` gains `--rotate 180` and `--shift-left`.
 
 ## v1.1.0
 

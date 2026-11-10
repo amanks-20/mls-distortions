@@ -28,6 +28,13 @@ the track from the mapper's own lane (5th percentile of height in 2 m bins,
     tools/.venv/bin/python tools/render_field.py --ids F38 --no-title --size 76 --shift -3.75 \
         --lane 0.5 3.5 --hmin 0.3 --hmax 2.0 --min-streak 8 --dot 3.5 --out-dir static/images/field
     (and the same with --theme dark)
+
+F36 is drawn rotated by 180 degrees, with the crop moved 0.6 m to the mapper's left so
+the mapper's path sits inside the frame (about 40 px from the edge), between the north
+arrow and the legend:
+
+    tools/.venv/bin/python tools/render_field.py --ids F36 --no-title --rotate 180 --shift-left 0.6 \
+        --out-dir static/images/field      (and the same with --theme dark)
 """
 import argparse
 import io
@@ -86,7 +93,7 @@ def crop(scanners, cx, cy, half, hmin, hmax):
 
 
 def render(scanners, traj, cx, cy, t, size, color, title, path, fmt, max_kb, hmin, hmax, stride, theme,
-           lane=None, min_streak=8.0, dot=1.6):
+           lane=None, min_streak=8.0, dot=1.6, rotate=0):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -97,10 +104,14 @@ def render(scanners, traj, cx, cy, t, size, color, title, path, fmt, max_kb, hmi
     fwd = np.array([math.sin(course), math.cos(course)])
     left = np.array([-math.cos(course), math.sin(course)])
     ox, oy = cx, cy                                             # crop centre -> origin of the local frame
+    # rotate=180 turns the map half a turn in the image plane (both image axes negated:
+    # a rotation, determinant +1, never a mirror). Only the data layer turns; the text,
+    # arrows and legend are drawn upright, in the opposite corners.
+    rs = -1.0 if rotate == 180 else 1.0
 
     def to_local(x, y):
         dx, dy = x - ox, y - oy
-        return dx * fwd[0] + dy * fwd[1], dx * left[0] + dy * left[1]
+        return rs * (dx * fwd[0] + dy * fwd[1]), rs * (dx * left[0] + dy * left[1])
 
     dark = theme == "dark"
     bg, fg, grid = ("#111111", "#e6e6e6", "#333333") if dark else ("#ffffff", "#1a1a1a", "#e3e3e3")
@@ -136,24 +147,33 @@ def render(scanners, traj, cx, cy, t, size, color, title, path, fmt, max_kb, hmi
         ax.scatter(lx, ly, s=dot, c=c, lw=0, alpha=0.85, zorder=2, label=LABELS[k] if color == "scanner" else None)
 
     ax.set_xlim(-hx, hx); ax.set_ylim(-hy, hy); ax.set_aspect("equal"); ax.axis("off")
-    # scale bar
     sb = step * (2 if size > 16 else 1)
-    x0, y0 = hx - sb - 0.04 * size, -hy + 0.05 * size
-    ax.plot([x0, x0 + sb], [y0, y0], color=fg, lw=2, solid_capstyle="butt")
-    ax.text(x0 + sb / 2, y0 + 0.02 * size, f"{sb:g} m", color=fg, ha="center", va="bottom", fontsize=8)
-    # mapper heading (+x) and north arrows
-    ax.annotate("", xy=(-hx + 0.12 * size, -hy + 0.05 * size), xytext=(-hx + 0.03 * size, -hy + 0.05 * size),
-                arrowprops=dict(arrowstyle="->", color=fg, lw=1.2))
-    ax.text(-hx + 0.13 * size, -hy + 0.05 * size, "mapper", color=fg, va="center", fontsize=8)
     north = np.array([0.0, 1.0])
-    nl = np.array([north @ fwd, north @ left]) * 0.06 * size
-    nc = np.array([hx - 0.06 * size, hy - 0.08 * size])
+    nl = rs * np.array([north @ fwd, north @ left]) * 0.06 * size
+    if rotate != 180:
+        # scale bar bottom-right, mapper arrow bottom-left pointing right, north arrow top-right
+        x0, y0 = hx - sb - 0.04 * size, -hy + 0.05 * size
+        ax.plot([x0, x0 + sb], [y0, y0], color=fg, lw=2, solid_capstyle="butt")
+        ax.text(x0 + sb / 2, y0 + 0.02 * size, f"{sb:g} m", color=fg, ha="center", va="bottom", fontsize=8)
+        ax.annotate("", xy=(-hx + 0.12 * size, -hy + 0.05 * size), xytext=(-hx + 0.03 * size, -hy + 0.05 * size),
+                    arrowprops=dict(arrowstyle="->", color=fg, lw=1.2))
+        ax.text(-hx + 0.13 * size, -hy + 0.05 * size, "mapper", color=fg, va="center", fontsize=8)
+        nc = np.array([hx - 0.06 * size, hy - 0.08 * size])
+    else:
+        # rotated: scale bar top-left, mapper arrow top-right pointing left, north arrow bottom-left
+        x0, y0 = -hx + 0.04 * size, hy - 0.05 * size
+        ax.plot([x0, x0 + sb], [y0, y0], color=fg, lw=2, solid_capstyle="butt")
+        ax.text(x0 + sb / 2, y0 - 0.02 * size, f"{sb:g} m", color=fg, ha="center", va="top", fontsize=8)
+        ax.annotate("", xy=(hx - 0.12 * size, hy - 0.05 * size), xytext=(hx - 0.03 * size, hy - 0.05 * size),
+                    arrowprops=dict(arrowstyle="->", color=fg, lw=1.2))
+        ax.text(hx - 0.13 * size, hy - 0.05 * size, "mapper", color=fg, ha="right", va="center", fontsize=8)
+        nc = np.array([-hx + 0.06 * size, -hy + 0.08 * size])
     ax.annotate("", xy=tuple(nc + nl / 2), xytext=tuple(nc - nl / 2), arrowprops=dict(arrowstyle="->", color=fg, lw=1.2))
     ax.text(*(nc + nl / 2 * 1.6), "N", color=fg, ha="center", va="center", fontsize=8)
     if title:
         ax.text(-hx + 0.02 * size, hy - 0.03 * size, title, color=fg, va="top", fontsize=8)
     if color == "scanner":
-        ax.legend(loc="upper center", fontsize=7, frameon=True, facecolor=bg, edgecolor="none", framealpha=0.9, labelcolor=fg, markerscale=5 * math.sqrt(1.6 / dot), ncol=2)
+        ax.legend(loc="lower center" if rotate == 180 else "upper center", fontsize=7, frameon=True, facecolor=bg, edgecolor="none", framealpha=0.9, labelcolor=fg, markerscale=5 * math.sqrt(1.6 / dot), ncol=2)
 
     buf = io.BytesIO(); fig.savefig(buf, format="png", facecolor=bg); plt.close(fig)
     im = Image.open(io.BytesIO(buf.getvalue())).convert("RGB")
@@ -239,6 +259,9 @@ def main():
                     help="show only one vehicle: points LO..HI m left of the mapper's path (see the module docstring)")
     ap.add_argument("--min-streak", type=float, default=8.0, help="with --lane: minimum length (m) of a connected streak")
     ap.add_argument("--dot", type=float, default=1.6, help="point size (matplotlib s)")
+    ap.add_argument("--shift-left", type=float, default=0.0, help="move the crop centre this many metres to the mapper's left")
+    ap.add_argument("--rotate", type=int, choices=[0, 180], default=0,
+                    help="180: turn the map half a turn in the image plane (a rotation, not a mirror); text stays upright")
     a = ap.parse_args()
 
     jobs = []
@@ -258,15 +281,16 @@ def main():
 
     scanners, traj = load_scanners(a.data), load_traj(a.data)
     for cx, cy, t, size, name, title in jobs:
-        if a.shift:
+        if a.shift or a.shift_left:
             _, _, crs = mapper_at(traj, t)
             cx, cy = cx + a.shift * math.sin(crs), cy + a.shift * math.cos(crs)
+            cx, cy = cx - a.shift_left * math.cos(crs), cy + a.shift_left * math.sin(crs)
         if a.no_title:
             title = ""
         suffix = "-dark" if a.theme == "dark" else ""
         path = os.path.join(a.out_dir, f"{name}{suffix}.{a.format}")
         n = render(scanners, traj, cx, cy, t, size, a.color, title, path, a.format, a.max_kb, a.hmin, a.hmax, a.stride, a.theme,
-                   lane=a.lane, min_streak=a.min_streak, dot=a.dot)
+                   lane=a.lane, min_streak=a.min_streak, dot=a.dot, rotate=a.rotate)
         print(f"{path}  {n / 1024:.0f} KB")
 
 
