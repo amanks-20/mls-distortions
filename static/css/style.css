@@ -391,6 +391,29 @@ math[display="block"] { margin: 0; overflow-x: auto; overflow-y: hidden; padding
 }
 .eq .num { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .eq-label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: var(--muted); }
+@media (max-width: 720px) {
+    /* A wide equation stays inside its card: one column whose content may
+       shrink, the equation scrolls on its own, and the number gets its own
+       row, right-aligned below it. Eq. (5) is shown as two stacked lines. */
+    .eq { grid-template-columns: minmax(0, 1fr); gap: 4px; min-width: 0; padding: 16px 14px; }
+    .eq > * { min-width: 0; max-width: 100%; }
+    /* Scrollers: the equation itself (Chromium), its stacked block, and the
+       card as a fallback (WebKit does not clip or scroll a <math> element).
+       A soft shadow marks an edge only while there is more to scroll. */
+    .eq, .eq math[display="block"], .eq .eq-stack { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .eq, .eq .eq-stack {
+        background:
+            linear-gradient(to right, var(--bg-alt) 40%, transparent) left / 28px 100% no-repeat local,
+            linear-gradient(to left, var(--bg-alt) 40%, transparent) right / 28px 100% no-repeat local,
+            linear-gradient(to right, color-mix(in srgb, var(--text) 16%, transparent), transparent) left / 12px 100% no-repeat scroll,
+            linear-gradient(to left, color-mix(in srgb, var(--text) 16%, transparent), transparent) right / 12px 100% no-repeat scroll,
+            var(--bg-alt);
+    }
+    .eq .num { justify-self: end; }
+    .eq .eq-wide { display: none; }
+    .eq .eq-stack[hidden] { display: block; }
+    .eq .eq-stack math + math { margin-top: 8px; }
+}
 
 /* ---------- Tables ---------- */
 .table-wrap { overflow-x: auto; margin: 18px 0; -webkit-overflow-scrolling: touch; }

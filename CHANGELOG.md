@@ -11,6 +11,7 @@
 - Field example F38 shows only the over-elongated car (points 0.5–3.5 m left of the mapper's path, 0.3–2 m above the road, in connected streaks), in a frame wide enough for both full streaks; `tools/render_field.py` gains the matching options.
 - Field images: the dark versions of F36 and F08 use the dark-theme scanner colours (#ff6b6b left, #6e9bff right), like F38; crop and points unchanged.
 - Field example F36: the caption notes that the simulator places the object on the mapper's left, while this oncoming vehicle is on its right.
+- Mobile (up to 720 px): wide equations stay inside their cards (they scroll there instead of widening the page), equation numbers sit on their own row, and Eq. (5) is shown as two stacked lines; desktop is unchanged.
 
 ## v1.1.0
 
