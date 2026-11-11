@@ -573,10 +573,6 @@ details.more summary { cursor: pointer; color: var(--link); font-size: 15px; }
 .field figcaption p { margin: 0 0 6px; }
 .field .field-meta, .field .field-scale, .field .field-credit { color: var(--muted); font-size: 12px; }
 .field .field-meta strong { color: var(--text); font-weight: 600; }
-/* Fixed size: the live body and invisible copies of every state share one cell */
-.field-stack { display: grid; grid-template-columns: minmax(0, 1fr); }
-.field-stack > * { grid-area: 1 / 1; min-width: 0; }
-.field-sizer { visibility: hidden; pointer-events: none; }
 /* Picker (cases without a field example) */
 .field-pick-title { margin: 0 0 8px; font-size: 13px; font-weight: 600; }
 .field-pick-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }

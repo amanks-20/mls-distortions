@@ -7,11 +7,6 @@
    The panel otherwise does not touch the explorer's state or drawing: it
    only watches which preset button is pressed (aria-pressed), which the
    explorer already maintains in applyPreset() and update().
-
-   Fixed size: the live body and an invisible, inert copy of every state
-   (picker, A2, B1; without images, whose boxes have a fixed aspect ratio)
-   share one grid cell, so the panel is always as tall as its tallest state
-   at the current width and does not change size when the preset changes.
    ========================================================================== */
 (function () {
     'use strict';
@@ -149,31 +144,5 @@
         body.replaceChildren(f ? figure(f.id || id, f) : picker());
     }
 
-    // Invisible copies of every state, in the same grid cell as the body
-    function reserve() {
-        var stack = el('div', 'field-stack');
-        body.parentNode.insertBefore(stack, body);
-        stack.appendChild(body);
-        var states = [picker()].concat(PICKS.map(function (p) { return figure(data[p.id].id || p.id, data[p.id]); }));
-        states.forEach(function (node) {
-            node.querySelectorAll('picture').forEach(function (pic) { pic.remove(); });
-            var s = el('div', 'field-sizer');
-            s.setAttribute('aria-hidden', 'true');
-            s.inert = true;
-            s.appendChild(node);
-            stack.appendChild(s);
-        });
-    }
-
-    // The explorer sets aria-pressed on the preset buttons; follow it.
-    var pending = false;
-    var obs = new MutationObserver(function () {
-        if (pending) return;
-        pending = true;
-        Promise.resolve().then(function () { pending = false; render(); });
-    });
-    presetBtns.forEach(function (b) { obs.observe(b, { attributes: true, attributeFilter: ['aria-pressed'] }); });
-
-    reserve();
     render();
 })();
