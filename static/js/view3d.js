@@ -535,7 +535,7 @@
         var hasTop = sim.pts.some(function (p) { return p.face === 'top'; });
         if (noteTop) noteTop.hidden = hasTop;
         if (noteH) {
-            var t = 'Scanner height ' + sim.hScanner + ' m (illustrative, not from the thesis, like the mounting position at the mapper\u2019s rear corners; the car is schematic). It shifts where the plane cuts the box but not its length or order. The scan plane is drawn as a finite patch; the real plane extends further.';
+            var t = 'Scanner height (' + sim.hScanner + ' m), the mounting position at the mapper\u2019s rear corners and the car shape are illustrative, not from the thesis. Height shifts where the plane cuts the box, not its length or order. The scan plane is drawn as a finite patch.';
             if (noteH.textContent !== t) noteH.textContent = t;
         }
     }
