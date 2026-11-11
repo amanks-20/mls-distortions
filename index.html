@@ -108,7 +108,7 @@
                     <div class="card">
                         <span class="tag">Length</span>
                         <h3>Shorter or longer</h3>
-                        <p>Head-on traffic shrinks; traffic you overtake stretches. The ratio depends only on two speeds.</p>
+                        <p>Head-on traffic shrinks; traffic you overtake stretches. The scanned-length ratio is set by the object's velocity relative to the effective scan-line velocity, which depends on the mapper's motion and scanner geometry.</p>
                     </div>
                     <div class="card">
                         <span class="tag">Layover</span>
@@ -172,14 +172,14 @@
                 <div class="fig-row">
                     <figure>
                         <div class="fig-img"><img src="static/images/scan-side.png" width="948" height="586" loading="lazy" alt="The same relative motion scanned from either side of the mapper produces identical distorted point clouds."></div>
-                        <figcaption><strong>The side does not matter.</strong> Scanning from the left or right of the mapper gives the same distortion if the relative angle θ is the same.</figcaption>
+                        <figcaption><strong>The side does not matter.</strong> An object passing on the mapper's left or right distorts the same way, as long as the relative angle θ is unchanged.</figcaption>
                     </figure>
                     <figure>
                         <div class="fig-img"><img src="static/images/scan-distance.png" width="988" height="533" loading="lazy" alt="Objects at increasing distances from the mapper produce point clouds with the same tilts, only farther apart."></div>
                         <figcaption><strong>Distance does not matter.</strong> Moving the object farther away only spreads the left and right clouds apart. The tilts stay the same.</figcaption>
                     </figure>
                 </div>
-                <p>Both follow from the equations: distortion depends only on the speeds, the direction of travel and the scanner angles, with no distance term. Try the side result with the Left/Right switch below.</p>
+                <p>Both follow from the equations: distortion is set by the relative motion (the speeds and θ) and the scan-plane angles, and neither the object's side nor its distance appears in them. The Left/Right switch below is a different question: it picks the other scanner, whose plane tilts the other way, so the same θ can give a very different cloud (compare left and right in case C1 below).</p>
 
                 <h3>Common questions</h3>
                 <details class="faq">
@@ -192,7 +192,7 @@
                 </details>
                 <details class="faq">
                     <summary>Why does it matter in practice?</summary>
-                    <p>Lengths read from MLS data can be wrong by metres, and skewed boxes can mislead object detection, tracking and mapping. Knowing the distortion lets you predict it, flag it, or in most cases correct it.</p>
+                    <p>Lengths read from MLS data can be wrong by metres, and skewed boxes can mislead object detection, tracking and mapping. Knowing the distortion lets you predict and flag it. When the object's velocity is known or estimated, the equations can be inverted to recover its true shape; over-elongated clouds cannot be recovered.</p>
                 </details>
                 <details class="faq">
                     <summary>What does the model assume?</summary>
@@ -411,7 +411,7 @@
             <section class="section" id="validation">
                 <p class="eyebrow">Results</p>
                 <h2>Validation in simulation</h2>
-                <p>The equations were tested on synthetic LiDAR data from the SimDaaS simulation engine, built on Unreal Engine. The virtual mapper copies the StreetMapper-V system, which carries two RIEGL VQ-450 2D rotating scanners. A 4 m × 2 m × 1.5 m box drove past it in 17 test cases: five directions (0°, 40°, 90°, 130°, 180°) and a range of speeds. Some cases repeated a speed ratio with different absolute speeds, to show that only the ratio matters.</p>
+                <p>The equations were tested on synthetic LiDAR data from the SimDaaS simulation engine, built on Unreal Engine. The virtual mapper copies the StreetMapper-V system, which carries two RIEGL VQ-450 2D rotating scanners. A 4 m × 2 m × 1.5 m box drove past it in 17 test cases: five directions (0°, 40°, 90°, 130°, 180°) and a range of speeds. Some cases used different absolute velocities with the same velocity ratio, to test that the predicted distortion is scale-independent.</p>
 
                 <figure>
                     <div class="fig-img photo"><picture><source media="(prefers-color-scheme: dark)" srcset="static/images/sim-scene-dark.jpg"><img src="static/images/sim-scene.jpg" width="1148" height="634" loading="lazy" alt="Unreal Engine scene with a red mobile mapping car and a white box on a road."></picture></div>
@@ -440,7 +440,7 @@
                     <div class="stat"><span class="v">0.49°</span><span class="k">Side tilt β</span></div>
                     <div class="stat"><span class="v">0.29°</span><span class="k">Top tilt γ</span></div>
                 </div>
-                <p>The remaining error comes from the data rather than the model. Points are sampled discretely, so corners and edges are never captured exactly, and the corner angles had to be measured by hand.</p>
+                <p>The remaining error may come from discrete point sampling, which never captures corners and edges exactly, from measuring the corner angles by hand, and from limits of the modelling assumptions.</p>
 
                 <details class="more">
                     <summary>Show all length test cases (thesis Table 6.1)</summary>
@@ -474,7 +474,7 @@
                 </details>
 
                 <h3>Limitations</h3>
-                <p>The model assumes constant straight-line velocities, flat ground, a single-channel 2D scanner and a rigid object that does not rotate. Validation used simulation only, because public MLS datasets lack ground-truth velocities for moving objects. The field examples show the same distortions in real data. Their speeds are estimates, so they illustrate the effects and are not used for validation. Natural next steps are non-uniform motion, multi-beam 3D LiDAR, estimating object velocity from the distortion itself, and correcting distorted clouds with these equations.</p>
+                <p>The model assumes constant straight-line velocities, flat ground, a single-channel 2D scanner and a rigid object that does not rotate. Validation used simulation only, because public MLS datasets lack ground-truth velocities for moving objects. Field data from Kerala and Guwahati show the same distortion patterns qualitatively, but their object speeds could not be measured reliably, so they are not used for validation. Natural next steps are non-uniform motion, multi-beam 3D LiDAR, estimating object velocity from the distortion itself, and correcting distorted clouds with these equations.</p>
             </section>
 
             <!-- ==================== Resources ==================== -->
