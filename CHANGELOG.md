@@ -22,6 +22,7 @@
 - Changed: corrected the acknowledgements; added a data note and a development note to the README.
 - Changed: the mobile mapper is drawn as a car in the 2D and 3D views (the 3D note says the car is schematic); the point clouds and all results are unchanged.
 - Tests (dev only): `tests/canvas-2d.json` re-recorded for the car (same browser and flags; only the mapper drawing changed).
+- Field panel: fixed size in every state (the canvas and readouts no longer move when the preset changes); for cases without a field example it shows a picker with the A2 and B1 examples, which loads the case exactly like its preset button.
 
 ## v1.1.0
 
