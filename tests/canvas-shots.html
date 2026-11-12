@@ -44,7 +44,8 @@
         var fig = document.createElement('figure'), img = document.createElement('img'), cap = document.createElement('figcaption');
         img.src = cv.toDataURL('image/png');
         var notes = d.getElementById('ex-3d-notes');
-        var txt = notes && !notes.hidden ? Array.from(notes.querySelectorAll('p')).filter(function (p) { return !p.hidden; }).map(function (p) { return p.textContent; }).join(' | ') : '(2D)';
+        var cap = d.getElementById('ex-3d-hs');
+        var txt = notes && !notes.hidden ? Array.from(notes.querySelectorAll('p')).concat(cap ? [cap] : []).filter(function (p) { return !p.hidden; }).map(function (p) { return p.textContent; }).join(' | ') : '(2D)';
         cap.textContent = c + '-' + side + (extra ? ' ' + extra : '') + ': ' + txt;
         fig.appendChild(img); fig.appendChild(cap); document.getElementById('row').appendChild(fig);
         log.push(cap.textContent);

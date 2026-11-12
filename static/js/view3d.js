@@ -561,7 +561,7 @@
         var hasTop = sim.pts.some(function (p) { return p.face === 'top'; });
         if (noteTop) noteTop.hidden = hasTop;
         if (noteH) {
-            var t = 'Scanner height (' + sim.hScanner + ' m), mounting position and car are illustrative. The readouts are not computed from this view.';
+            var t = '3D view: the scanner height (' + sim.hScanner + ' m), mounting position and car are illustrative. The readouts come from the 2D model.';
             if (noteH.textContent !== t) noteH.textContent = t;
         }
     }
@@ -575,6 +575,7 @@
         if (planeBtn) planeBtn.hidden = !on;
         if (legendPlane) legendPlane.hidden = !(on && showPlane);
         if (notes) notes.hidden = !on;
+        if (noteH) noteH.hidden = !on;
         if (legendLine) legendLine.hidden = on;
         box.classList.toggle('is-3d', on);
         if (on) {
