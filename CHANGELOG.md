@@ -24,7 +24,6 @@
 - Tests (dev only): `tests/canvas-2d.json` re-recorded for the car (same browser and flags; only the mapper drawing changed).
 - Changed: the 3D-view note is one short line: the scanner height, mounting position and car are illustrative, and the readouts are not computed from the 3D view (wording only).
 - Changed: the 3D-view note is a caption below the legend ("3D view: the scanner height (2.5 m), mounting position and car are illustrative. The readouts come from the 2D model."); the top-face warning stays under the canvas.
-- 3D: the box during the scan has an F marker 0.6 m ahead of its front face, as in 2D, so front and back (and layover) stay readable after rotating the view. Display only.
 - Changed: wording checked against the paper and thesis: the length-ratio card, the side/distance results, the correction FAQ, the validation speed-ratio sentence, the residual-error sentence and the field-data limitation.
 - Changed: field examples F36 and F38: shorter captions (the speeds, scanner colours and scale-bar lengths are already in the tag line or the image), no location in the tag line; F38 alt text no longer repeats that other objects were removed.
 - Changed: the scan-line legend swatch is drawn in the selected scanner's colour (red left, blue right) at the canvas line's opacity, instead of grey.
