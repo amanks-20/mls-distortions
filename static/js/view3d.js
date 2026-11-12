@@ -43,7 +43,6 @@
     var legendPlaneText = legendPlane && legendPlane.querySelector('.l-plane-text');
     var notes = root.querySelector('#ex-3d-notes');
     var noteTop = root.querySelector('#ex-3d-notop');
-    var noteH = root.querySelector('#ex-3d-hs');
     var box = canvas.parentNode;
     var label2d = canvas.getAttribute('aria-label');
     // Legend entry for the scan line: the 3D view does not draw one
@@ -560,10 +559,6 @@
         if (!notes) return;
         var hasTop = sim.pts.some(function (p) { return p.face === 'top'; });
         if (noteTop) noteTop.hidden = hasTop;
-        if (noteH) {
-            var t = '3D view: the scanner height (' + sim.hScanner + ' m), mounting position and car are illustrative. The readouts come from the 2D model.';
-            if (noteH.textContent !== t) noteH.textContent = t;
-        }
     }
 
     // ---------- mode toggle ----------
@@ -575,7 +570,6 @@
         if (planeBtn) planeBtn.hidden = !on;
         if (legendPlane) legendPlane.hidden = !(on && showPlane);
         if (notes) notes.hidden = !on;
-        if (noteH) noteH.hidden = !on;
         if (legendLine) legendLine.hidden = on;
         box.classList.toggle('is-3d', on);
         if (on) {
