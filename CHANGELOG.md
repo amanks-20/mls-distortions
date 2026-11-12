@@ -22,7 +22,7 @@
 - Changed: corrected the acknowledgements; added a data note and a development note to the README.
 - Changed: the mobile mapper is drawn as a car in the 2D and 3D views (the 3D note says the car is schematic); the point clouds and all results are unchanged.
 - Tests (dev only): `tests/canvas-2d.json` re-recorded for the car (same browser and flags; only the mapper drawing changed).
-- Changed: the 3D-view note is shorter and says where the readouts and the Simulation line come from (wording only).
+- Changed: the 3D-view note is one short line: the scanner height, mounting position and car are illustrative, and the readouts are not computed from the 3D view (wording only).
 - Changed: wording checked against the paper and thesis: the length-ratio card, the side/distance results, the correction FAQ, the validation speed-ratio sentence, the residual-error sentence and the field-data limitation.
 - Changed: field examples F36 and F38: shorter captions (the speeds, scanner colours and scale-bar lengths are already in the tag line or the image), no location in the tag line; F38 alt text no longer repeats that other objects were removed.
 
