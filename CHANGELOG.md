@@ -26,6 +26,7 @@
 - Changed: wording checked against the paper and thesis: the length-ratio card, the side/distance results, the correction FAQ, the validation speed-ratio sentence, the residual-error sentence and the field-data limitation.
 - Changed: field examples F36 and F38: shorter captions (the speeds, scanner colours and scale-bar lengths are already in the tag line or the image), no location in the tag line; F38 alt text no longer repeats that other objects were removed.
 - Changed: the scan-line legend swatch is drawn in the selected scanner's colour (red left, blue right) at the canvas line's opacity, instead of grey.
+- Changed: the recorded-points legend swatch is a row of three dots in the scanner's colour instead of a solid bar, so it matches the drawn cloud and is not mistaken for the scan line.
 
 ## v1.1.0
 
