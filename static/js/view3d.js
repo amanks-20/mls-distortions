@@ -535,6 +535,15 @@
         if (nowD) {
             wire(nowD, objCol, null, 1.2);
             if (rec) rec.boxes.now = nowD;
+            // Front marker, as in 2D: 0.6 m ahead of the centre of the front face
+            // (corners 0, 1, 5, 4 are the +u end). Display only.
+            var ff = [0, 0, 0];
+            [0, 1, 5, 4].forEach(function (i) { ff[0] += nowD[i][0] / 4; ff[1] += nowD[i][1] / 4; ff[2] += nowD[i][2] / 4; });
+            var fq = P(ff[0] + sim.u[0] * 0.6, ff[1] + sim.u[1] * 0.6, ff[2]);
+            ctx.fillStyle = text; ctx.font = '600 11px ' + css('--font');
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText('F', fq[0], fq[1]);
+            if (rec) rec.front = [ff[0] + sim.u[0] * 0.6, ff[1] + sim.u[1] * 0.6, ff[2]];
         }
         if (rec) { rec.tNow = tNow; rec.progress = progress; rec.cam = { yaw: cam.yaw, pitch: cam.pitch, zoom: cam.zoom }; window.mlsDrawRecord = rec; }
 
