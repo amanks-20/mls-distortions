@@ -27,6 +27,7 @@
 - Changed: field examples F36 and F38: shorter captions (the speeds, scanner colours and scale-bar lengths are already in the tag line or the image), no location in the tag line; F38 alt text no longer repeats that other objects were removed.
 - Changed: the scan-line legend swatch is drawn in the selected scanner's colour (red left, blue right) at the canvas line's opacity, instead of grey.
 - Changed: the recorded-points legend swatch is a row of three dots in the scanner's colour instead of a solid bar, so it matches the drawn cloud and is not mistaken for the scan line.
+- 3D: the box during the scan has a light fill in the object colour (22%, as in 2D) on the faces turned to the camera; it is drawn under the point cloud, so the points keep their full colour. Display only.
 
 ## v1.1.0
 

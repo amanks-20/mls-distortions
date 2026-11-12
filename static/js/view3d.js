@@ -480,6 +480,33 @@
             ctx.closePath(); ctx.strokeStyle = text; ctx.lineWidth = 1.2; ctx.stroke();
         }
 
+        // Box now: light fill in the object colour (22%, as in 2D) on the faces
+        // turned to the camera only, so the tint stays even. Drawn before the
+        // points so the cloud stays at full colour; the outline is drawn after.
+        var nowD = progress < 1 ? boxCorners(sim, tNow).map(D) : null;
+        if (nowD) {
+            var bc = [0, 0, 0];
+            nowD.forEach(function (p) { bc[0] += p[0] / 8; bc[1] += p[1] / 8; bc[2] += p[2] / 8; });
+            var boxFaces = [[0, 1, 2, 3], [4, 5, 6, 7], [0, 1, 5, 4], [1, 2, 6, 5], [2, 3, 7, 6], [3, 0, 4, 7]];
+            ctx.fillStyle = objCol; ctx.globalAlpha = 0.22;
+            ctx.beginPath();
+            boxFaces.forEach(function (f) {
+                var a = nowD[f[0]], b = nowD[f[1]], d = nowD[f[3]];
+                var u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], w = [d[0] - a[0], d[1] - a[1], d[2] - a[2]];
+                var n = [u[1] * w[2] - u[2] * w[1], u[2] * w[0] - u[0] * w[2], u[0] * w[1] - u[1] * w[0]];
+                var fc = [0, 0, 0];
+                f.forEach(function (i) { fc[0] += nowD[i][0] / 4; fc[1] += nowD[i][1] / 4; fc[2] += nowD[i][2] / 4; });
+                if (n[0] * (fc[0] - bc[0]) + n[1] * (fc[1] - bc[1]) + n[2] * (fc[2] - bc[2]) < 0) n = [-n[0], -n[1], -n[2]];
+                if (n[0] * B.f[0] + n[1] * B.f[1] + n[2] * B.f[2] <= 1e-9) return;   // turned away
+                f.forEach(function (i, j) {
+                    var q = P(nowD[i][0], nowD[i][1], nowD[i][2]);
+                    if (j) ctx.lineTo(q[0], q[1]); else ctx.moveTo(q[0], q[1]);
+                });
+                ctx.closePath();
+            });
+            ctx.fill(); ctx.globalAlpha = 1;
+        }
+
         // Points captured so far: thinned, depth-sorted (far first), shaded by face
         var mask = displayMask(sim, scale, targetPx);
         var vis = [];
@@ -505,8 +532,7 @@
         if (cur !== null) ctx.fill();
 
         // Box now (while scanning)
-        if (progress < 1) {
-            var nowD = boxCorners(sim, tNow).map(D);
+        if (nowD) {
             wire(nowD, objCol, null, 1.2);
             if (rec) rec.boxes.now = nowD;
         }
