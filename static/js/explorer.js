@@ -507,6 +507,8 @@
         sideBtns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.side === state.side)); });
         var swatch = root.querySelector('#ex-pts-swatch');
         if (swatch) swatch.classList.toggle('left', state.side === 'L');
+        var lineSwatch = root.querySelector('#ex-line-swatch');
+        if (lineSwatch) lineSwatch.classList.toggle('left', state.side === 'L');
         if (!fromPreset) presetBtns.forEach(function (b) { b.setAttribute('aria-pressed', 'false'); });
 
         var m = model(state);
