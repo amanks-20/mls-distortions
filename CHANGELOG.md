@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Social-preview card now shows the simulator controls and a 3D result; card title names the simulator.
 - Field panel text shortened.
 - Field panel tag lines now say the speeds are estimated.
 - Field panel is hidden when the case has no field example.
