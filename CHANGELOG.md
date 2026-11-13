@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Field panel is hidden when the case has no field example.
 - README shortened to the essentials, with a 30 s demo video (`static/video/explorer-demo.mp4`).
 - Social-preview image replaced with a simulator frame.
 - CITATION.cff prepared for archiving (authors, paper as preferred citation).

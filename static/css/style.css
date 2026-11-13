@@ -562,6 +562,9 @@ details.more summary { cursor: pointer; color: var(--link); font-size: 15px; }
 .field h3 { margin: 0 0 8px; font-size: 15px; font-weight: 600; letter-spacing: 0; }
 .field-body { font-size: 13px; line-height: 1.45; }
 .field-empty { margin: 0; color: var(--muted); }
+/* No field example for this case: hidden, keeping the grid column on wide screens */
+.field[data-empty] { visibility: hidden; }
+@media (max-width: 1339.98px) { .field[data-empty] { display: none; } }
 .field figure { margin: 0; }
 .field-img {
     display: block;

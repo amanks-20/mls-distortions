@@ -9,12 +9,12 @@
     'use strict';
 
     var root = document.getElementById('explorer');
+    var panel = document.getElementById('ex-field');
     var body = document.getElementById('ex-field-body');
     var data = window.FIELD_DATA;
-    if (!root || !body || !data) return;
+    if (!root || !panel || !body || !data) return;
 
     var presetBtns = root.querySelectorAll('[data-preset]');
-    var available = Object.keys(data).filter(function (k) { return data[k]; }).sort();
     var shown;                                   // preset id currently rendered ('' = none)
 
     function el(tag, cls, text) {
@@ -24,8 +24,19 @@
         return e;
     }
 
-    function message(text) {
-        body.replaceChildren(el('p', 'field-empty', text));
+    // Hidden when the case has no field example: the CSS keeps its grid column
+    // on wide screens (visibility) and removes it on narrow ones (display).
+    function setEmpty(empty) {
+        if (empty) {
+            body.replaceChildren();
+            panel.setAttribute('data-empty', '');
+            panel.setAttribute('aria-hidden', 'true');
+            panel.inert = true;
+        } else {
+            panel.removeAttribute('data-empty');
+            panel.removeAttribute('aria-hidden');
+            panel.inert = false;
+        }
     }
 
     function speed(v) {
@@ -56,7 +67,7 @@
         img.height = f.height || 600;
         img.loading = 'lazy';
         img.decoding = 'async';
-        img.addEventListener('error', function () { message('The field image could not be loaded.'); });
+        img.addEventListener('error', function () { body.replaceChildren(el('p', 'field-empty', 'The field image could not be loaded.')); });
         pic.appendChild(img);
         link.appendChild(pic);
         fig.appendChild(link);
@@ -94,12 +105,9 @@
         var id = currentPreset();
         if (id === shown) return;                // nothing changed: don't re-announce
         shown = id;
-        if (!id) {
-            message('Field examples are shown for the thesis test cases (' + available.join(', ') + ').');
-            return;
-        }
-        var f = data[id];
-        if (!f) { message('No field example yet for this case.'); return; }
+        var f = id && data[id];
+        if (!f) { setEmpty(true); return; }
+        setEmpty(false);
         body.replaceChildren(figure(f.id || id, f));
     }
 
