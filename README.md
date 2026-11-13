@@ -6,7 +6,7 @@ When a mobile laser scanner and the object it scans are both moving, the point c
 
 [![The simulator: controls beside a 3D scan of a moving box](static/images/og-card.png)](https://amanks-20.github.io/mls-distortions/static/video/explorer-demo.mp4)
 
-*Click the image for a 30 s demo video (no sound).*
+*Click the image for a 30 s demo video (no sound, captions on screen).*
 
 ## Publications
 
