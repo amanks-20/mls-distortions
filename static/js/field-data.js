@@ -22,7 +22,7 @@
     'use strict';
 
     var SCANNERS = { left: { colour: 'red', hex: '#d93636' }, right: { colour: 'blue', hex: '#2f5bd3' } };
-    var CREDIT = 'Field data: StreetMapper-V survey (two RIEGL VQ-450 scanners), Guwahati, from A. K. Singh, M.Tech thesis, IIT Kanpur, 2025.';
+    var CREDIT = 'Field data: StreetMapper-V survey, Guwahati. A.\u00a0K.\u00a0Singh, M.Tech thesis, IIT Kanpur, 2025.';   // no-break: keep the initials together
 
     var FIELD_CASES = {
         F38: {
@@ -32,14 +32,15 @@
             imageDark: 'static/images/field/F38-dark.webp',
             width: 960, height: 600,
             alt: 'Top view of real mobile laser scanning data, showing only the points of one car in the lane just left of the mapper’s path. The car is smeared into long thin streaks by the left scanner (red) and the right scanner (blue), far longer than the car itself. Scale bar 10 m.',
-            caption: 'A car in the lane just left of the mapper drove at almost the mapper’s speed, so the scan lines kept sampling the same part of it and both scanners recorded a long streak instead of a car.',
+            caption: 'A car in the lane just left of the mapper drove at almost the mapper’s speed, so the scan lines kept sampling the same part of it and recorded a long streak instead of a car.',
+            objectLabel: 'car',
             vm: { kmh: 30 },
             vo: { kmh: 31, pm: 2 },
             theta: 0,
             location: null,
             date: null,
             gpsTime: 535418.9,
-            scale: 'Top view, mapper travelling left to right. Grid 5\u00a0m. Only the car’s points, 0.3–2\u00a0m above the road.',
+            scale: 'Top view, mapper moves left to right. Grid 5\u00a0m. Only the car’s points are shown.',
             scanners: SCANNERS,
             credit: CREDIT
         },
@@ -68,14 +69,15 @@
             imageDark: 'static/images/field/F36-dark.webp',
             width: 960, height: 600,
             alt: 'Top view of real mobile laser scanning data. An oncoming vehicle to the right of the mapper appears twice, side by side: the left scanner’s copy (red) is sheared into a parallelogram and the right scanner’s copy (blue) has a different shape. The map is rotated 180° (not mirrored), so the mapper travels right to left and the vehicle appears above its path. Scale bar 1 m.',
-            caption: 'An oncoming vehicle to the right of the mapper met the scan lines head-on, so each scanner swept it quickly and recorded a shortened, sheared copy at a different place.',
+            caption: 'An oncoming vehicle meets the scan lines head-on, so they sweep it quickly and record a shortened, sheared copy, displaced from its true position.',
+            objectLabel: 'vehicle',
             vm: { kmh: 38 },
             vo: { kmh: 30, pm: 14 },
             theta: -175,
             location: null,
             date: null,
             gpsTime: 535415.2,
-            scale: 'Top view rotated 180°, mapper travelling right to left. Grid 1 m. Points 0.5–3 m above the road.',
+            scale: 'Top view, rotated 180° (mapper moves right to left). Grid 1\u00a0m.',
             scanners: SCANNERS,
             credit: CREDIT
         }

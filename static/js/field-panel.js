@@ -75,18 +75,16 @@
         var cap = el('figcaption');
         cap.appendChild(el('p', null, f.caption));
 
+        // "<regime> · estimated speeds: mapper 38 km/h, vehicle 30 ± 14 km/h" from the data
         var meta = el('p', 'field-meta');
         var parts = [
-            f.regime,
-            'estimated: mapper\u00a0' + speed(f.vm),
-            'object\u00a0' + speed(f.vo),
-            'θ\u00a0≈\u00a0' + Math.abs(f.theta) + '°',
-            f.location
+            'estimated speeds: mapper\u00a0' + speed(f.vm) + ', ' + (f.objectLabel || 'object') + '\u00a0' + speed(f.vo),
+            f.location,
+            f.date
         ];
-        if (f.date) parts.push(f.date);
-        meta.appendChild(el('strong', null, id + '\u00a0· '));
+        meta.appendChild(el('strong', null, f.regime));
         // the separator stays at the end of a line, never at the start of the next
-        meta.appendChild(document.createTextNode(parts.filter(Boolean).join('\u00a0· ')));
+        meta.appendChild(document.createTextNode('\u00a0· ' + parts.filter(Boolean).join('\u00a0· ')));
         cap.appendChild(meta);
 
         if (f.scale) cap.appendChild(el('p', 'field-scale', f.scale));

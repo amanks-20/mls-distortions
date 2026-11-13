@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Field panel text shortened.
 - Field panel tag lines now say the speeds are estimated.
 - Field panel is hidden when the case has no field example.
 - README shortened to the essentials, with a 30 s demo video (`static/video/explorer-demo.mp4`).
