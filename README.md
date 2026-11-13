@@ -4,7 +4,7 @@ When a mobile laser scanner and the object it scans are both moving, the point c
 
 **Project page and simulator: https://amanks-20.github.io/mls-distortions/**
 
-[![Demo: the simulator scanning a moving box in 3D](static/images/og-card.png)](https://amanks-20.github.io/mls-distortions/static/video/explorer-demo.mp4)
+[![The simulator: controls beside a 3D scan of a moving box](static/images/og-card.png)](https://amanks-20.github.io/mls-distortions/static/video/explorer-demo.mp4)
 
 *Click the image for a 30 s demo video (no sound).*
 
@@ -17,7 +17,7 @@ When a mobile laser scanner and the object it scans are both moving, the point c
 
 ## Using the simulator
 
-Pick a thesis test case (A1, B1, A3, A2, C1, D2) or set the speeds, direction and scan angles yourself. The readouts come from the paper's equations; an independent scan simulation draws the point cloud next to them, in a 2D top view or in 3D. Links such as `?case=A3` or `?case=B1&side=L` open a case directly.
+Choose a thesis test case or set the speeds, direction and scan angles yourself. The readouts come from the paper's equations; a separate scan simulation draws the point cloud, in a 2D top view or in 3D. The 3D view is not used for the readouts, and its scanner height (2.5 m), mounting position and car shape are illustrative, not from the thesis.
 
 For A2 and B1, a panel shows a vehicle from a real StreetMapper survey in Guwahati in the same regime. Its speeds are estimates from the point clouds, and the survey data are not public.
 

@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- README usage paragraph simplified; 3D illustrative-setup caveat added.
 - Social-preview card now shows the simulator controls and a 3D result; card title names the simulator.
 - Field panel text shortened.
 - Field panel tag lines now say the speeds are estimated.
