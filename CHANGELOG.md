@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Social-preview image replaced with a simulator frame.
 - CITATION.cff prepared for archiving (authors, paper as preferred citation).
 - Reset view button is hidden in the 2D view and shown only in 3D.
 - Below 1340 px, the field panel now comes after the readouts (canvas, readouts, field panel).
