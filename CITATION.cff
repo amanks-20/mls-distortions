@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: "If you use this software, please cite the paper below."
 type: software
 title: "Motion-Induced Point Cloud Distortions in Mobile Laser Scanning: project page and distortion explorer"
-version: 1.1.0
-date-released: 2026-11-08
+version: 1.2.0
+date-released: 2026-11-13
 license: MIT
 authors:
   - family-names: Singh

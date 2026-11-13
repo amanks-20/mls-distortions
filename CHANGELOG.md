@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v1.2.0 (2026-11-13)
+
 - Demo video re-captured from the current site (4:5, with captions).
 - README usage paragraph simplified; 3D illustrative-setup caveat added.
 - Social-preview card now shows the simulator controls and a 3D result; card title names the simulator.
