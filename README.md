@@ -67,24 +67,9 @@ python3 tests/canvas_capture.py --compare tests/canvas-2d.json
 
 Code for the analysis is in preparation.
 
-## Cite this software
-
-If you use the project page or the distortion explorer, please cite the software release **and** the journal article below. Citation metadata is in [`CITATION.cff`](CITATION.cff) (GitHub shows a "Cite this repository" button for it).
-
-> **TODO: Zenodo DOI not minted yet.** Replace `10.5281/zenodo.XXXXXXX` below with the concept DOI once a release has been archived on Zenodo.
-
-```bibtex
-@software{singh2026mlsdistortions,
-  title   = {Motion-Induced Point Cloud Distortions in Mobile Laser Scanning: project page and distortion explorer},
-  author  = {Singh, Aman Kumar and Lohani, Bharat},
-  version = {1.1.0},
-  year    = {2026},
-  doi     = {10.5281/zenodo.XXXXXXX},
-  url     = {https://github.com/amanks-20/mls-distortions}
-}
-```
-
 ## Citation
+
+If you use the project page or the distortion explorer, please cite the paper. Citation metadata is in [`CITATION.cff`](CITATION.cff) (GitHub shows a "Cite this repository" button for it).
 
 ```bibtex
 @article{singh2026modeling,
@@ -98,6 +83,20 @@ If you use the project page or the distortion explorer, please cite the software
   doi     = {10.1061/JSUED2.SUENG-1663}
 }
 ```
+
+The software itself:
+
+```bibtex
+@software{singh2026mlsdistortions,
+  title   = {Motion-Induced Point Cloud Distortions in Mobile Laser Scanning: project page and distortion explorer},
+  author  = {Singh, Aman Kumar and Lohani, Bharat},
+  version = {1.1.0},
+  year    = {2026},
+  url     = {https://github.com/amanks-20/mls-distortions}
+}
+```
+
+DOI: to be added after the first archived release
 
 ## Licence
 

@@ -1,13 +1,9 @@
 cff-version: 1.2.0
-message: >-
-  If you use this software, please cite it as below, and also cite the
-  journal article listed under preferred-citation.
+message: "If you use this software, please cite the paper below."
 type: software
 title: "Motion-Induced Point Cloud Distortions in Mobile Laser Scanning: project page and distortion explorer"
 version: 1.1.0
 date-released: 2026-11-08
-# TODO: add the Zenodo concept DOI once Zenodo has minted it, e.g.
-# doi: 10.5281/zenodo.XXXXXXX
 license: MIT
 authors:
   - family-names: Singh
@@ -18,18 +14,18 @@ authors:
     given-names: Bharat
     affiliation: Indian Institute of Technology Kanpur
 repository-code: "https://github.com/amanks-20/mls-distortions"
-url: "https://amanks-20.github.io/mls-distortions/"
+url: "https://amanks-20.github.io/mls-distortions"
 abstract: >-
   Static project page for the study of motion-induced point cloud distortions
   in mobile laser scanning, with an interactive explorer that runs the
   closed-form distortion equations next to an independent top-view scan
   simulation, and field examples from a StreetMapper-V survey.
 keywords:
-  - mobile laser scanning
   - LiDAR
-  - point cloud distortion
-  - moving objects
-  - layover
+  - mobile laser scanning
+  - point cloud
+  - motion distortion
+  - simulation
 references:
   - type: thesis
     title: Understanding and Modeling Motion-Induced Point Cloud Distortions in Mobile Laser Scanning
