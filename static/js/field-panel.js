@@ -40,7 +40,7 @@
     }
 
     function speed(v) {
-        return v.kmh + (v.pm ? ' ± ' + v.pm : '') + ' km/h';
+        return v.kmh + (v.pm ? '\u00a0±\u00a0' + v.pm : '') + '\u00a0km/h';   // no-break spaces: keep numbers with units
     }
 
     function figure(id, f) {
@@ -78,14 +78,15 @@
         var meta = el('p', 'field-meta');
         var parts = [
             f.regime,
-            'mapper ' + speed(f.vm),
-            'object ' + speed(f.vo),
-            'θ ≈ ' + Math.abs(f.theta) + '°',
+            'estimated: mapper\u00a0' + speed(f.vm),
+            'object\u00a0' + speed(f.vo),
+            'θ\u00a0≈\u00a0' + Math.abs(f.theta) + '°',
             f.location
         ];
         if (f.date) parts.push(f.date);
-        meta.appendChild(el('strong', null, id + ' · '));
-        meta.appendChild(document.createTextNode(parts.filter(Boolean).join(' · ')));
+        meta.appendChild(el('strong', null, id + '\u00a0· '));
+        // the separator stays at the end of a line, never at the start of the next
+        meta.appendChild(document.createTextNode(parts.filter(Boolean).join('\u00a0· ')));
         cap.appendChild(meta);
 
         if (f.scale) cap.appendChild(el('p', 'field-scale', f.scale));

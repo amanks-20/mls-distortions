@@ -39,7 +39,7 @@
             location: null,
             date: null,
             gpsTime: 535418.9,
-            scale: 'Top view, mapper travelling left to right. Grid 5 m. Only the car’s points: 0.5–3.5 m left of the mapper’s path, 0.3–2 m above the road.',
+            scale: 'Top view, mapper travelling left to right. Grid 5\u00a0m. Only the car’s points, 0.3–2\u00a0m above the road.',
             scanners: SCANNERS,
             credit: CREDIT
         },
