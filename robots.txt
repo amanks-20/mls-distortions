@@ -1,0 +1,7 @@
+# Note: crawlers only read robots.txt at the domain root
+# (https://amanks-20.github.io/robots.txt). This file is kept for reference;
+# the root robots.txt should list this sitemap.
+User-agent: *
+Allow: /
+
+Sitemap: https://amanks-20.github.io/mls-distortions/sitemap.xml
