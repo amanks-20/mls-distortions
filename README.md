@@ -2,7 +2,7 @@
 
 When a mobile laser scanner and the object it scans are both moving, the point cloud is distorted: the object can look shorter, longer, reversed (**layover**) or skewed into a **parallelepiped**. This project gives closed-form equations for these distortions and an interactive simulator to explore them.
 
-**Project page and simulator: https://amanks-20.github.io/mls-distortions/**
+**Project page and simulator (MLS Distortions Explorer): https://amanks-20.github.io/mls-distortions/**
 
 [![The simulator: controls beside a 3D scan of a moving box](static/images/og-card.png)](https://amanks-20.github.io/mls-distortions/static/video/explorer-demo.mp4)
 
@@ -60,7 +60,7 @@ Please cite the paper. Metadata is in [`CITATION.cff`](CITATION.cff) (GitHub's "
 }
 ```
 
-DOI: to be added after the first archived release
+Software DOI (MLS Distortions Explorer, all versions): [10.5281/zenodo.24182492](https://doi.org/10.5281/zenodo.24182492)
 
 ## Licence
 

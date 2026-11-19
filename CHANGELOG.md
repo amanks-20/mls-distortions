@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Citation metadata: software title is now 'MLS Distortions Explorer: An Interactive Simulator for Motion-Induced Point Cloud Distortions in Mobile Laser Scanning'; added the Zenodo concept DOI to CITATION.cff and README.
+
 ## v1.2.0 (2026-11-13)
 
 - Demo video re-captured from the current site (4:5, with captions).
