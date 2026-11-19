@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Footer version corrected to 1.2.1; software citation added to the Cite section; CITATION.cff abstract aligned with the Zenodo description; sitemap lastmod; CITATION.cff message now names the paper DOI.
+
 ## v1.2.1 (2026-11-19)
 
 - Citation metadata: software title is now 'MLS Distortions Explorer: An Interactive Simulator for Motion-Induced Point Cloud Distortions in Mobile Laser Scanning'; added the Zenodo concept DOI to CITATION.cff and README.

@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite the paper below."
+message: "If you use this software, please cite the paper (doi:10.1061/JSUED2.SUENG-1663)."
 type: software
 title: "MLS Distortions Explorer: An Interactive Simulator for Motion-Induced Point Cloud Distortions in Mobile Laser Scanning"
 version: 1.2.1
@@ -21,10 +21,13 @@ authors:
 repository-code: "https://github.com/amanks-20/mls-distortions"
 url: "https://amanks-20.github.io/mls-distortions"
 abstract: >-
-  Static project page for the study of motion-induced point cloud distortions
-  in mobile laser scanning, with an interactive explorer that runs the
-  closed-form distortion equations next to an independent top-view scan
-  simulation, and field examples from a StreetMapper-V survey.
+  Static project page and interactive simulator accompanying Singh & Lohani
+  (2026), Modeling Point Cloud Distortions in Mobile Laser Scanning for
+  Surveying, Journal of Surveying Engineering 152(3), 04026006. It implements
+  the paper's closed-form equations for how motion distorts a scanned moving
+  object (length and orientation) next to an independent scan simulation in
+  2D and 3D, with field examples from a StreetMapper-V survey (two RIEGL
+  VQ-450 scanners), Guwahati. Live page: https://amanks-20.github.io/mls-distortions
 keywords:
   - LiDAR
   - mobile laser scanning
