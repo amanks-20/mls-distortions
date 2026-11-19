@@ -60,7 +60,7 @@ Please cite the paper. Metadata is in [`CITATION.cff`](CITATION.cff) (GitHub's "
 }
 ```
 
-Software DOI (MLS Distortions Explorer, all versions): [10.5281/zenodo.24182492](https://doi.org/10.5281/zenodo.24182492)
+Software DOI: [10.5281/zenodo.24182492](https://doi.org/10.5281/zenodo.24182492)
 
 ## Licence
 

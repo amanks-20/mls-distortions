@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Footer version corrected to 1.2.1; software citation added to the Cite section; CITATION.cff abstract aligned with the Zenodo description; sitemap lastmod; CITATION.cff message now names the paper DOI.
+- Footer version corrected to 1.2.1; software citation added to the Cite section; CITATION.cff abstract aligned with the Zenodo description; sitemap lastmod; CITATION.cff message now names the paper DOI; shortened the software DOI wording.
 
 ## v1.2.1 (2026-11-19)
 
