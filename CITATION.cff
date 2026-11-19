@@ -3,10 +3,8 @@ message: "If you use this software, please cite the paper below."
 type: software
 title: "MLS Distortions Explorer: An Interactive Simulator for Motion-Induced Point Cloud Distortions in Mobile Laser Scanning"
 version: 1.2.1
-# PLACEHOLDER: set to the v1.2.1 release date before tagging
-date-released: YYYY-MM-DD
+date-released: 2026-11-19
 license: MIT
-# TODO confirm against the Zenodo record before release
 doi: 10.5281/zenodo.24182492
 identifiers:
   - type: doi
