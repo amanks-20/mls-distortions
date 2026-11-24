@@ -526,7 +526,7 @@
                 <p class="eyebrow">Cite</p>
                 <h2>BibTeX</h2>
                 <p>If this work is useful in your research, please cite the paper:</p>
-                <pre class="bib"><button type="button" class="pill bib-copy">Copy</button>@article{singh2026modeling,
+                <pre class="bib"><button type="button" class="pill bib-copy" aria-label="Copy BibTeX" title="Copy BibTeX"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="vertical-align:-3px"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15h-.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V5"/></svg></button>@article{singh2026modeling,
   title   = {Modeling Point Cloud Distortions in Mobile Laser Scanning for Surveying},
   author  = {Singh, Aman Kumar and Lohani, Bharat},
   journal = {Journal of Surveying Engineering},
@@ -537,7 +537,7 @@
   doi     = {10.1061/JSUED2.SUENG-1663}
 }</pre>
                 <p style="margin-top:18px">and, for the full derivations, the thesis:</p>
-                <pre class="bib"><button type="button" class="pill bib-copy">Copy</button>@mastersthesis{singh2025understanding,
+                <pre class="bib"><button type="button" class="pill bib-copy" aria-label="Copy BibTeX" title="Copy BibTeX"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="vertical-align:-3px"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15h-.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V5"/></svg></button>@mastersthesis{singh2025understanding,
   title  = {Understanding and Modeling Motion-Induced Point Cloud Distortions in Mobile Laser Scanning},
   author = {Singh, Aman Kumar},
   school = {Indian Institute of Technology Kanpur},
@@ -546,7 +546,7 @@
   doi    = {10.6084/m9.figshare.32005947}
 }</pre>
                 <p style="margin-top:18px">and, for the software:</p>
-                <pre class="bib"><button type="button" class="pill bib-copy">Copy</button>@software{singh2026mlsexplorer,
+                <pre class="bib"><button type="button" class="pill bib-copy" aria-label="Copy BibTeX" title="Copy BibTeX"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="vertical-align:-3px"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15h-.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V5"/></svg></button>@software{singh2026mlsexplorer,
   title     = {{MLS Distortions Explorer}: An Interactive Simulator for Motion-Induced Point Cloud Distortions in Mobile Laser Scanning},
   author    = {Singh, Aman Kumar and Lohani, Bharat},
   year      = {2026},
@@ -585,12 +585,16 @@
     <script src="static/js/field-panel.js"></script>
     <script>
         // BibTeX: copy to clipboard
+        var checkIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="vertical-align:-3px"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
         document.querySelectorAll('.bib-copy').forEach(function (btn) {
+            var copyIcon = btn.innerHTML, timer;
             btn.addEventListener('click', function () {
-                var text = btn.parentElement.textContent.replace(btn.textContent, '').trim();
-                navigator.clipboard.writeText(text).then(function () {
-                    btn.textContent = 'Copied';
-                    setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
+                var block = btn.parentElement.cloneNode(true);
+                block.querySelector('.bib-copy').remove();
+                navigator.clipboard.writeText(block.textContent.trim()).then(function () {
+                    btn.innerHTML = checkIcon;
+                    clearTimeout(timer);
+                    timer = setTimeout(function () { btn.innerHTML = copyIcon; }, 1500);
                 });
             });
         });
