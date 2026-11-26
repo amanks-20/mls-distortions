@@ -6,6 +6,7 @@
 - Acknowledgements: state coding assistance on the page, matching the README.
 - Cite: Copy buttons show a copy icon (checkmark after copying), matching the Publications page on amanks-20.github.io.
 - Explorer: shortened the note under the readouts (signs and units).
+- Acknowledgements: rewritten to lead with the author's own work; supervision line dropped (covered by authorship).
 
 ## v1.2.1 (2026-11-19)
 
